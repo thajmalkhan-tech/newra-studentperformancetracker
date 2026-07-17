@@ -64,6 +64,23 @@ function Performance() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["marks"] }),
   });
 
+  const updateSubject = useMutation({
+    mutationFn: async (s: { id: string; name: string; code: string | null; credits: number }) => {
+      const { error } = await supabase.from("subjects").update({ name: s.name, code: s.code, credits: s.credits }).eq("id", s.id);
+      if (error) throw error;
+    },
+    onSuccess: () => { setEditingId(null); qc.invalidateQueries({ queryKey: ["subjects"] }); },
+  });
+
+  const removeSubject = useMutation({
+    mutationFn: async (id: string) => { const { error } = await supabase.from("subjects").delete().eq("id", id); if (error) throw error; },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["subjects"] }),
+  });
+
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editDraft, setEditDraft] = useState({ name: "", code: "", credits: "3" });
+
+
   // Compute per-subject weighted percentage
   const rows = (subjects ?? []).map((s) => {
     const rel = (marks ?? []).filter((m) => m.subject_id === s.id);
