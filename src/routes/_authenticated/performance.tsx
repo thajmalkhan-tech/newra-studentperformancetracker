@@ -132,19 +132,55 @@ function Performance() {
             </form>
             <ul className="divide-y divide-border">
               {rows.map((s) => (
-                <li key={s.id} className="flex items-center justify-between py-2 text-sm">
-                  <div>
-                    <div className="font-medium">{s.name} {s.code && <span className="text-xs text-muted-foreground">({s.code})</span>}</div>
-                    <div className="text-xs text-muted-foreground">{s.count} marks · {s.credits} credits</div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-sm font-semibold">{s.pct.toFixed(1)}%</div>
-                    <div className="text-xs text-muted-foreground">GP {s.gp.toFixed(2)}</div>
-                  </div>
+                <li key={s.id} className="py-2 text-sm">
+                  {editingId === s.id ? (
+                    <form
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        if (!editDraft.name.trim()) return;
+                        updateSubject.mutate({ id: s.id, name: editDraft.name.trim(), code: editDraft.code.trim() || null, credits: Number(editDraft.credits) || 3 });
+                      }}
+                      className="flex flex-wrap items-center gap-2"
+                    >
+                      <input value={editDraft.name} onChange={(e) => setEditDraft({ ...editDraft, name: e.target.value })} className="flex-1 min-w-[120px] rounded-md border border-input bg-background px-2 py-1 text-sm" />
+                      <input value={editDraft.code} onChange={(e) => setEditDraft({ ...editDraft, code: e.target.value })} placeholder="Code" className="w-20 rounded-md border border-input bg-background px-2 py-1 text-sm" />
+                      <input value={editDraft.credits} onChange={(e) => setEditDraft({ ...editDraft, credits: e.target.value })} className="w-16 rounded-md border border-input bg-background px-2 py-1 text-sm" />
+                      <button type="submit" className="rounded-md bg-primary px-2 py-1 text-xs text-primary-foreground">Save</button>
+                      <button type="button" onClick={() => setEditingId(null)} className="rounded-md border border-border px-2 py-1 text-xs">Cancel</button>
+                    </form>
+                  ) : (
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="font-medium">{s.name} {s.code && <span className="text-xs text-muted-foreground">({s.code})</span>}</div>
+                        <div className="text-xs text-muted-foreground">{s.count} marks · {s.credits} credits</div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="text-right">
+                          <div className="text-sm font-semibold">{s.pct.toFixed(1)}%</div>
+                          <div className="text-xs text-muted-foreground">GP {s.gp.toFixed(2)}</div>
+                        </div>
+                        <button
+                          onClick={() => { setEditingId(s.id); setEditDraft({ name: s.name, code: s.code ?? "", credits: String(s.credits) }); }}
+                          className="rounded p-1 text-muted-foreground hover:text-foreground"
+                          aria-label="Edit subject"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => { if (confirm(`Delete "${s.name}" and all its marks?`)) removeSubject.mutate(s.id); }}
+                          className="rounded p-1 text-muted-foreground hover:text-destructive"
+                          aria-label="Delete subject"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </li>
               ))}
               {rows.length === 0 && <li className="py-6 text-center text-sm text-muted-foreground">No subjects yet.</li>}
             </ul>
+
           </div>
 
           <div className="rounded-2xl border border-border bg-card p-5">
