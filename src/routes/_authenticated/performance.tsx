@@ -3,7 +3,7 @@ import { AppShell, PageHeader } from "@/components/AppShell";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
-import { Plus, Trash2, Pencil } from "lucide-react";
+import { Plus, Trash2, Pencil, ChevronRight, ChevronDown } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 
 export const Route = createFileRoute("/_authenticated/performance")({
@@ -12,6 +12,9 @@ export const Route = createFileRoute("/_authenticated/performance")({
 
 type Subject = { id: string; name: string; code: string | null; credits: number };
 type Mark = { id: string; subject_id: string; assessment: string; score: number; max_score: number; weight: number; recorded_at: string };
+type MarkDraft = { assessment: string; score: string; max_score: string; weight: string };
+
+const emptyDraft: MarkDraft = { assessment: "", score: "", max_score: "100", weight: "1" };
 
 function Performance() {
   const qc = useQueryClient();
@@ -42,21 +45,28 @@ function Performance() {
     onSuccess: () => { setNewSubject({ name: "", code: "", credits: "3" }); qc.invalidateQueries({ queryKey: ["subjects"] }); },
   });
 
-  const [newMark, setNewMark] = useState({ subject_id: "", assessment: "", score: "", max_score: "100", weight: "1" });
+  const [drafts, setDrafts] = useState<Record<string, MarkDraft>>({});
+  const getDraft = (id: string) => drafts[id] ?? emptyDraft;
+  const setDraft = (id: string, patch: Partial<MarkDraft>) =>
+    setDrafts((d) => ({ ...d, [id]: { ...(d[id] ?? emptyDraft), ...patch } }));
+
   const addMark = useMutation({
-    mutationFn: async () => {
+    mutationFn: async ({ subjectId, draft }: { subjectId: string; draft: MarkDraft }) => {
       const { data: u } = await supabase.auth.getUser();
       const { error } = await supabase.from("marks").insert({
         user_id: u.user!.id,
-        subject_id: newMark.subject_id,
-        assessment: newMark.assessment,
-        score: Number(newMark.score),
-        max_score: Number(newMark.max_score) || 100,
-        weight: Number(newMark.weight) || 1,
+        subject_id: subjectId,
+        assessment: draft.assessment,
+        score: Number(draft.score),
+        max_score: Number(draft.max_score) || 100,
+        weight: Number(draft.weight) || 1,
       });
       if (error) throw error;
     },
-    onSuccess: () => { setNewMark({ subject_id: "", assessment: "", score: "", max_score: "100", weight: "1" }); qc.invalidateQueries({ queryKey: ["marks"] }); },
+    onSuccess: (_r, vars) => {
+      setDrafts((d) => ({ ...d, [vars.subjectId]: { ...emptyDraft } }));
+      qc.invalidateQueries({ queryKey: ["marks"] });
+    },
   });
 
   const removeMark = useMutation({
@@ -79,7 +89,8 @@ function Performance() {
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editDraft, setEditDraft] = useState({ name: "", code: "", credits: "3" });
-
+  const [openFolders, setOpenFolders] = useState<Record<string, boolean>>({});
+  const toggle = (id: string) => setOpenFolders((o) => ({ ...o, [id]: !o[id] }));
 
   // Compute per-subject weighted percentage
   const rows = (subjects ?? []).map((s) => {
@@ -87,7 +98,7 @@ function Performance() {
     const totalWeight = rel.reduce((a, m) => a + Number(m.weight), 0) || 1;
     const pct = rel.reduce((a, m) => a + (Number(m.score) / Number(m.max_score)) * 100 * Number(m.weight), 0) / totalWeight;
     const gp = (pct / 10);
-    return { ...s, pct: isFinite(pct) ? pct : 0, gp: isFinite(gp) ? gp : 0, count: rel.length };
+    return { ...s, pct: isFinite(pct) ? pct : 0, gp: isFinite(gp) ? gp : 0, count: rel.length, marks: rel };
   });
   const totalCredits = rows.reduce((a, r) => a + Number(r.credits), 0);
   const gpa = totalCredits > 0 ? rows.reduce((a, r) => a + r.gp * Number(r.credits), 0) / totalCredits : 0;
@@ -131,87 +142,99 @@ function Performance() {
               <button className="flex items-center gap-1 rounded-md bg-primary px-3 py-2 text-sm text-primary-foreground"><Plus className="h-4 w-4" /></button>
             </form>
             <ul className="divide-y divide-border">
-              {rows.map((s) => (
-                <li key={s.id} className="py-2 text-sm">
-                  {editingId === s.id ? (
-                    <form
-                      onSubmit={(e) => {
-                        e.preventDefault();
-                        if (!editDraft.name.trim()) return;
-                        updateSubject.mutate({ id: s.id, name: editDraft.name.trim(), code: editDraft.code.trim() || null, credits: Number(editDraft.credits) || 3 });
-                      }}
-                      className="flex flex-wrap items-center gap-2"
-                    >
-                      <input value={editDraft.name} onChange={(e) => setEditDraft({ ...editDraft, name: e.target.value })} className="flex-1 min-w-[120px] rounded-md border border-input bg-background px-2 py-1 text-sm" />
-                      <input value={editDraft.code} onChange={(e) => setEditDraft({ ...editDraft, code: e.target.value })} placeholder="Code" className="w-20 rounded-md border border-input bg-background px-2 py-1 text-sm" />
-                      <input value={editDraft.credits} onChange={(e) => setEditDraft({ ...editDraft, credits: e.target.value })} className="w-16 rounded-md border border-input bg-background px-2 py-1 text-sm" />
-                      <button type="submit" className="rounded-md bg-primary px-2 py-1 text-xs text-primary-foreground">Save</button>
-                      <button type="button" onClick={() => setEditingId(null)} className="rounded-md border border-border px-2 py-1 text-xs">Cancel</button>
-                    </form>
-                  ) : (
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <div className="font-medium">{s.name} {s.code && <span className="text-xs text-muted-foreground">({s.code})</span>}</div>
-                        <div className="text-xs text-muted-foreground">{s.count} marks · {s.credits} credits</div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <div className="text-right">
-                          <div className="text-sm font-semibold">{s.pct.toFixed(1)}%</div>
-                          <div className="text-xs text-muted-foreground">GP {s.gp.toFixed(2)}</div>
+              {rows.map((s) => {
+                const isOpen = !!openFolders[s.id];
+                const draft = getDraft(s.id);
+                return (
+                  <li key={s.id} className="py-2 text-sm">
+                    {editingId === s.id ? (
+                      <form
+                        onSubmit={(e) => {
+                          e.preventDefault();
+                          if (!editDraft.name.trim()) return;
+                          updateSubject.mutate({ id: s.id, name: editDraft.name.trim(), code: editDraft.code.trim() || null, credits: Number(editDraft.credits) || 3 });
+                        }}
+                        className="flex flex-wrap items-center gap-2"
+                      >
+                        <input value={editDraft.name} onChange={(e) => setEditDraft({ ...editDraft, name: e.target.value })} className="flex-1 min-w-[120px] rounded-md border border-input bg-background px-2 py-1 text-sm" />
+                        <input value={editDraft.code} onChange={(e) => setEditDraft({ ...editDraft, code: e.target.value })} placeholder="Code" className="w-20 rounded-md border border-input bg-background px-2 py-1 text-sm" />
+                        <input value={editDraft.credits} onChange={(e) => setEditDraft({ ...editDraft, credits: e.target.value })} className="w-16 rounded-md border border-input bg-background px-2 py-1 text-sm" />
+                        <button type="submit" className="rounded-md bg-primary px-2 py-1 text-xs text-primary-foreground">Save</button>
+                        <button type="button" onClick={() => setEditingId(null)} className="rounded-md border border-border px-2 py-1 text-xs">Cancel</button>
+                      </form>
+                    ) : (
+                      <>
+                        <div className="flex items-center justify-between gap-2">
+                          <button
+                            type="button"
+                            onClick={() => toggle(s.id)}
+                            className="flex flex-1 items-center gap-2 rounded-md px-1 py-1 text-left hover:bg-muted/50"
+                            aria-expanded={isOpen}
+                          >
+                            {isOpen ? <ChevronDown className="h-4 w-4 shrink-0" /> : <ChevronRight className="h-4 w-4 shrink-0" />}
+                            <div className="flex-1">
+                              <div className="font-medium">{s.name} {s.code && <span className="text-xs text-muted-foreground">({s.code})</span>}</div>
+                              <div className="text-xs text-muted-foreground">{s.count} marks · {s.credits} credits</div>
+                            </div>
+                          </button>
+                          <div className="flex items-center gap-3">
+                            <div className="text-right">
+                              <div className="text-sm font-semibold">{s.pct.toFixed(1)}%</div>
+                              <div className="text-xs text-muted-foreground">GP {s.gp.toFixed(2)}</div>
+                            </div>
+                            <button
+                              onClick={() => { setEditingId(s.id); setEditDraft({ name: s.name, code: s.code ?? "", credits: String(s.credits) }); }}
+                              className="rounded p-1 text-muted-foreground hover:text-foreground"
+                              aria-label="Edit subject"
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </button>
+                            <button
+                              onClick={() => { if (confirm(`Delete "${s.name}" and all its marks?`)) removeSubject.mutate(s.id); }}
+                              className="rounded p-1 text-muted-foreground hover:text-destructive"
+                              aria-label="Delete subject"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </div>
                         </div>
-                        <button
-                          onClick={() => { setEditingId(s.id); setEditDraft({ name: s.name, code: s.code ?? "", credits: String(s.credits) }); }}
-                          className="rounded p-1 text-muted-foreground hover:text-foreground"
-                          aria-label="Edit subject"
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </button>
-                        <button
-                          onClick={() => { if (confirm(`Delete "${s.name}" and all its marks?`)) removeSubject.mutate(s.id); }}
-                          className="rounded p-1 text-muted-foreground hover:text-destructive"
-                          aria-label="Delete subject"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </li>
-              ))}
+
+                        {isOpen && (
+                          <div className="mt-3 ml-6 rounded-lg border border-border bg-background/50 p-3">
+                            <form
+                              onSubmit={(e) => { e.preventDefault(); if (draft.assessment && draft.score) addMark.mutate({ subjectId: s.id, draft }); }}
+                              className="mb-3 grid gap-2 md:grid-cols-5"
+                            >
+                              <input value={draft.assessment} onChange={(e) => setDraft(s.id, { assessment: e.target.value })} placeholder="Assessment" className="md:col-span-2 rounded-md border border-input bg-background px-3 py-2 text-sm" />
+                              <input value={draft.score} onChange={(e) => setDraft(s.id, { score: e.target.value })} placeholder="Score" className="rounded-md border border-input bg-background px-3 py-2 text-sm" />
+                              <input value={draft.max_score} onChange={(e) => setDraft(s.id, { max_score: e.target.value })} placeholder="Max" className="rounded-md border border-input bg-background px-3 py-2 text-sm" />
+                              <input value={draft.weight} onChange={(e) => setDraft(s.id, { weight: e.target.value })} placeholder="Weight" className="rounded-md border border-input bg-background px-3 py-2 text-sm" />
+                              <button className="md:col-span-5 rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground">Add mark</button>
+                            </form>
+                            <ul className="divide-y divide-border">
+                              {s.marks.slice().reverse().map((m) => (
+                                <li key={m.id} className="flex items-center justify-between py-2 text-sm">
+                                  <div>
+                                    <div className="font-medium">{m.assessment}</div>
+                                    <div className="text-xs text-muted-foreground">{new Date(m.recorded_at).toLocaleDateString()} · w{m.weight}</div>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <div className="text-sm">{m.score}/{m.max_score}</div>
+                                    <button onClick={() => removeMark.mutate(m.id)} className="rounded p-1 text-muted-foreground hover:text-destructive"><Trash2 className="h-4 w-4" /></button>
+                                  </div>
+                                </li>
+                              ))}
+                              {s.marks.length === 0 && <li className="py-3 text-center text-xs text-muted-foreground">No marks yet.</li>}
+                            </ul>
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </li>
+                );
+              })}
               {rows.length === 0 && <li className="py-6 text-center text-sm text-muted-foreground">No subjects yet.</li>}
             </ul>
-
-            <div className="mt-6 border-t border-border pt-4">
-              <h3 className="mb-3 text-sm font-medium">Add a mark</h3>
-              <form onSubmit={(e) => { e.preventDefault(); if (newMark.subject_id && newMark.assessment && newMark.score) addMark.mutate(); }} className="mb-4 grid gap-2 md:grid-cols-2">
-                <select value={newMark.subject_id} onChange={(e) => setNewMark({ ...newMark, subject_id: e.target.value })} className="rounded-md border border-input bg-background px-3 py-2 text-sm">
-                  <option value="">Select subject</option>
-                  {(subjects ?? []).map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
-                </select>
-                <input value={newMark.assessment} onChange={(e) => setNewMark({ ...newMark, assessment: e.target.value })} placeholder="Assessment (e.g. Midterm)" className="rounded-md border border-input bg-background px-3 py-2 text-sm" />
-                <input value={newMark.score} onChange={(e) => setNewMark({ ...newMark, score: e.target.value })} placeholder="Score" className="rounded-md border border-input bg-background px-3 py-2 text-sm" />
-                <input value={newMark.max_score} onChange={(e) => setNewMark({ ...newMark, max_score: e.target.value })} placeholder="Max" className="rounded-md border border-input bg-background px-3 py-2 text-sm" />
-                <input value={newMark.weight} onChange={(e) => setNewMark({ ...newMark, weight: e.target.value })} placeholder="Weight" className="rounded-md border border-input bg-background px-3 py-2 text-sm" />
-                <button className="md:col-span-2 rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground">Add mark</button>
-              </form>
-              <ul className="divide-y divide-border">
-                {(marks ?? []).slice(-8).reverse().map((m) => {
-                  const s = subjects?.find((x) => x.id === m.subject_id);
-                  return (
-                    <li key={m.id} className="flex items-center justify-between py-2 text-sm">
-                      <div>
-                        <div className="font-medium">{m.assessment} · {s?.name ?? "—"}</div>
-                        <div className="text-xs text-muted-foreground">{new Date(m.recorded_at).toLocaleDateString()} · w{m.weight}</div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="text-sm">{m.score}/{m.max_score}</div>
-                        <button onClick={() => removeMark.mutate(m.id)} className="rounded p-1 text-muted-foreground hover:text-destructive"><Trash2 className="h-4 w-4" /></button>
-                      </div>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
           </div>
         </section>
 

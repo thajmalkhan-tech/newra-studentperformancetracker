@@ -1,18 +1,29 @@
-## Planner UI update
+## Goal
 
-Modify `src/routes/_authenticated/planner.tsx` only.
+On the Performance page, turn the Subjects list into collapsible subject folders. Each subject becomes a folder button; expanding it reveals that subject's marks and an "Add mark" form scoped to it. Removes the shared "Add a mark" section at the bottom (subject is implicit per folder).
 
-**Remove**
-- Priority `<select>` from the add-task form and the `priority` state.
-- Due date `<input type="datetime-local">` and `due` state.
-- The "due date · priority" meta line under each task title.
+## Changes — `src/routes/_authenticated/performance.tsx`
 
-**Add**
-- Status `<select>` in the add-task form with options: To do, Doing, Done (default: To do). Included in the insert.
-- Status badge on each task row (small pill showing current status).
-- Inline status `<select>` on each open task row so users can move between `todo` / `doing` / `done` without deleting. The existing checkbox stays as a shortcut for toggling done.
+### Layout
+- Each subject row becomes a folder header (button) with: chevron icon, name (+ code), mark count, weighted % and GP on the right, plus the existing Edit / Delete icons.
+- Clicking the header toggles the folder open. Local `useState<Record<string, boolean>>` keyed by subject id; default all collapsed.
+- When open, the folder body shows:
+  - A compact "Add mark" form: assessment, score, max (default 100), weight (default 1), Add button. `subject_id` is fixed to that folder.
+  - A list of that subject's marks (assessment, date, weight, score/max, delete icon). Sorted newest first.
+  - Empty state: "No marks yet."
 
-**Grouping**
-- Split lists into three sections: To do, Doing, Done (instead of just To do / Done).
+### State
+- Replace the single `newMark` state with a per-subject draft map: `Record<string, { assessment: string; score: string; max_score: string; weight: string }>`. Helper to read/update by subject id.
+- `addMark` mutation takes the subject id + draft, resets that folder's draft on success.
 
-No schema, no backend changes — `tasks.status` already supports these values.
+### Removed
+- The standalone "Add a mark" section and the "Recent marks" list under it (their functionality now lives inside each folder).
+
+### Kept as-is
+- Subjects create form at the top of the card, subject edit/delete, GPA/trend cards, all queries and mutations for `subjects` and `marks`, all RLS-backed data flow.
+
+## Not changed
+- Database schema, RLS, `notes` section — no migrations.
+
+## Out of scope
+- Drag-to-reorder subjects, bulk mark import.
