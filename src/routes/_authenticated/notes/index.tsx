@@ -98,9 +98,10 @@ function NotesIndex() {
         {open && (
           <div className="mb-6 rounded-2xl border border-border bg-card p-5">
             <div className="mb-3 flex items-center gap-3">
-              <label className="flex cursor-pointer items-center gap-2 rounded-md border border-dashed border-input px-3 py-2 text-sm hover:bg-secondary">
-                <Upload className="h-4 w-4" /> Upload .txt / .md
-                <input type="file" accept=".txt,.md,text/plain" className="hidden" onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])} />
+              <label className={`flex cursor-pointer items-center gap-2 rounded-md border border-dashed border-input px-3 py-2 text-sm hover:bg-secondary ${uploading ? "pointer-events-none opacity-60" : ""}`}>
+                {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                {uploading ? "Extracting…" : "Upload file (PDF, DOCX, image, text…)"}
+                <input type="file" className="hidden" disabled={uploading} onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])} />
               </label>
               <span className="text-xs text-muted-foreground">or paste your notes below</span>
             </div>
