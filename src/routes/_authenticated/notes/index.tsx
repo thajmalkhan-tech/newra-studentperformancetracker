@@ -16,6 +16,7 @@ function NotesIndex() {
   const nav = useNavigate();
   const list = useServerFn(listNotes);
   const ingest = useServerFn(ingestNoteText);
+  const ingestFile = useServerFn(ingestNoteFile);
   const remove = useServerFn(deleteNote);
 
   const { data: notes } = useQuery({ queryKey: ["notes"], queryFn: () => list({}) });
@@ -23,6 +24,7 @@ function NotesIndex() {
   const [title, setTitle] = useState("");
   const [text, setText] = useState("");
   const [open, setOpen] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   const create = useMutation({
     mutationFn: async () => ingest({ data: { title, text } }),
@@ -40,14 +42,48 @@ function NotesIndex() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["notes"] }),
   });
 
+  const TEXT_EXT = /\.(txt|md|markdown|csv|tsv|json|xml|yaml|yml|html?|log|rtf)$/i;
+
+  async function fileToBase64(f: File): Promise<string> {
+    const buf = new Uint8Array(await f.arrayBuffer());
+    let binary = "";
+    const chunk = 0x8000;
+    for (let i = 0; i < buf.length; i += chunk) {
+      binary += String.fromCharCode(...buf.subarray(i, i + chunk));
+    }
+    return btoa(binary);
+  }
+
   async function handleFile(f: File) {
-    if (f.type === "text/plain" || f.name.endsWith(".txt") || f.name.endsWith(".md")) {
+    const maxBytes = 20 * 1024 * 1024;
+    if (f.size > maxBytes) {
+      toast.error("File is larger than 20MB.");
+      return;
+    }
+    const cleanTitle = f.name.replace(/\.[^.]+$/, "");
+    const isTextLike = f.type.startsWith("text/") || TEXT_EXT.test(f.name);
+    if (isTextLike) {
       const t = await f.text();
-      setTitle(f.name.replace(/\.[^.]+$/, ""));
+      setTitle(cleanTitle);
       setText(t);
       setOpen(true);
-    } else {
-      toast.error("For now, please paste text or upload a .txt/.md file. PDF support is coming soon.");
+      return;
+    }
+    try {
+      setUploading(true);
+      toast.info("Extracting text from your file…");
+      const base64 = await fileToBase64(f);
+      const res = await ingestFile({
+        data: { title: cleanTitle, mime: f.type || "application/octet-stream", filename: f.name, base64 },
+      });
+      toast.success("Note indexed");
+      qc.invalidateQueries({ queryKey: ["notes"] });
+      setOpen(false);
+      nav({ to: "/notes/$noteId", params: { noteId: res.id } });
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : String(e));
+    } finally {
+      setUploading(false);
     }
   }
 
