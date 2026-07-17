@@ -1,5 +1,7 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
-import { BookOpen, Calendar, FileText, Home, LineChart, LogOut, MessageSquare, Target, User, Users } from "lucide-react";
+import { BookOpen, Calendar, FileText, Home, LineChart, LogOut, MessageSquare, MoreHorizontal, Target, User, Users } from "lucide-react";
+import { useState } from "react";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import type { ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -19,6 +21,10 @@ export function AppShell({ children }: { children: ReactNode }) {
   const loc = useLocation();
   const navigate = useNavigate();
   const qc = useQueryClient();
+  const [moreOpen, setMoreOpen] = useState(false);
+  const primary = nav.slice(0, 4);
+  const overflow = nav.slice(4);
+  const overflowActive = overflow.some((i) => loc.pathname === i.to || loc.pathname.startsWith(i.to + "/"));
 
   const { data: profile } = useQuery({
     queryKey: ["me"],
@@ -90,7 +96,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       {/* Mobile bottom nav */}
       <nav className="fixed bottom-0 left-0 right-0 z-10 flex items-center justify-around border-t border-border bg-background/95 backdrop-blur md:hidden">
-        {nav.slice(0, 5).map((item) => {
+        {primary.map((item) => {
           const active = loc.pathname === item.to || loc.pathname.startsWith(item.to + "/");
           return (
             <Link key={item.to} to={item.to} className={`flex flex-col items-center gap-0.5 py-2 text-xs ${active ? "text-primary" : "text-muted-foreground"}`}>
@@ -99,6 +105,44 @@ export function AppShell({ children }: { children: ReactNode }) {
             </Link>
           );
         })}
+        <Sheet open={moreOpen} onOpenChange={setMoreOpen}>
+          <SheetTrigger asChild>
+            <button className={`flex flex-col items-center gap-0.5 py-2 text-xs ${overflowActive ? "text-primary" : "text-muted-foreground"}`}>
+              <MoreHorizontal className="h-5 w-5" />
+              More
+            </button>
+          </SheetTrigger>
+          <SheetContent side="bottom" className="rounded-t-xl">
+            <SheetHeader>
+              <SheetTitle>More</SheetTitle>
+            </SheetHeader>
+            <div className="mt-4 grid grid-cols-2 gap-2 pb-4">
+              {overflow.map((item) => {
+                const active = loc.pathname === item.to || loc.pathname.startsWith(item.to + "/");
+                return (
+                  <Link
+                    key={item.to}
+                    to={item.to}
+                    onClick={() => setMoreOpen(false)}
+                    className={`flex items-center gap-3 rounded-md border border-border px-3 py-3 text-sm ${active ? "bg-primary text-primary-foreground" : "hover:bg-accent"}`}
+                  >
+                    <item.icon className="h-4 w-4" />
+                    {item.label}
+                  </Link>
+                );
+              })}
+              <button
+                onClick={() => {
+                  setMoreOpen(false);
+                  signOut();
+                }}
+                className="col-span-2 mt-2 flex items-center justify-center gap-2 rounded-md border border-border px-3 py-3 text-sm hover:bg-accent"
+              >
+                <LogOut className="h-4 w-4" /> Sign out
+              </button>
+            </div>
+          </SheetContent>
+        </Sheet>
       </nav>
     </div>
   );
