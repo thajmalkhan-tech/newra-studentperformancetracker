@@ -65,10 +65,10 @@ export function AppShell({ children }: { children: ReactNode }) {
           })}
         </nav>
         <div className="border-t border-sidebar-border p-3">
-          <div className="mb-2 px-2">
+          <Link to="/profile" className="mb-2 block rounded-md px-2 py-1 hover:bg-sidebar-accent">
             <p className="truncate text-sm font-medium">{profile?.profile?.full_name ?? profile?.user?.email}</p>
             <p className="truncate text-xs text-muted-foreground">{profile?.roles?.join(", ") || "student"}</p>
-          </div>
+          </Link>
           <button onClick={signOut} className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-sidebar-accent">
             <LogOut className="h-4 w-4" /> Sign out
           </button>
