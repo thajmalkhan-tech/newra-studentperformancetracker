@@ -54,14 +54,27 @@ async function persistNote(opts: {
   const { error: cerr } = await supabase.from("note_chunks").insert(rows);
   if (cerr) throw new Error(cerr.message);
 
-  const gateway = createLovableAiGatewayProvider(requireLovableApiKey());
-  const { text: summary } = await generateText({
-    model: gateway("google/gemini-2.5-flash"),
-    prompt: `Summarize the following study material into 5-8 bullet points capturing the key ideas a student should remember:\n\n${text.slice(0, 12000)}`,
-  });
-  await supabase.from("notes").update({ summary, status: "ready" }).eq("id", note.id);
+  await supabase.from("notes").update({ status: "ready" }).eq("id", note.id);
   return { id: note.id as string };
 }
+
+export const summarizeNote = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ id: uuid }).parse(d))
+  .handler(async ({ context, data }) => {
+    const { data: chunks, error } = await context.supabase
+      .from("note_chunks").select("content").eq("note_id", data.id).order("chunk_index").limit(30);
+    if (error) throw new Error(error.message);
+    const text = (chunks ?? []).map((c) => c.content).join("\n\n").slice(0, 12000);
+    if (text.length < 20) throw new Error("Not enough content to summarize");
+    const gateway = createLovableAiGatewayProvider(requireLovableApiKey());
+    const { text: summary } = await generateText({
+      model: gateway("google/gemini-2.5-flash"),
+      prompt: `Summarize the following study material into 5-8 bullet points capturing the key ideas a student should remember:\n\n${text}`,
+    });
+    await context.supabase.from("notes").update({ summary }).eq("id", data.id);
+    return { summary };
+  });
 
 export const ingestNoteText = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
