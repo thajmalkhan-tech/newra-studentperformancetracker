@@ -24,11 +24,12 @@ async function persistNote(opts: {
   title: string;
   mime: string;
   text: string;
+  storagePath?: string | null;
 }) {
-  const { supabase, userId, title, mime, text } = opts;
+  const { supabase, userId, title, mime, text, storagePath } = opts;
   const { data: note, error: nerr } = await supabase
     .from("notes")
-    .insert({ user_id: userId, title, mime, status: "processing" })
+    .insert({ user_id: userId, title, mime, status: "processing", storage_path: storagePath ?? null })
     .select("id")
     .single();
   if (nerr || !note) throw new Error(nerr?.message ?? "Failed to create note");
