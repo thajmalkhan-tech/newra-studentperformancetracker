@@ -121,7 +121,7 @@ function Performance() {
           </div>
         </div>
 
-        <section className="mt-6 grid gap-6 lg:grid-cols-2">
+        <section className="mt-6 grid gap-6">
           <div className="rounded-2xl border border-border bg-card p-5">
             <h2 className="mb-3 font-medium">Subjects</h2>
             <form onSubmit={(e) => { e.preventDefault(); if (newSubject.name.trim()) addSubject.mutate(); }} className="mb-4 flex flex-wrap gap-2">
