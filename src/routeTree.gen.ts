@@ -16,7 +16,6 @@ import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedPlannerRouteImport } from './routes/_authenticated/planner'
 import { Route as AuthenticatedPerformanceRouteImport } from './routes/_authenticated/performance'
-import { Route as AuthenticatedPeopleRouteImport } from './routes/_authenticated/people'
 import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/home'
 import { Route as AuthenticatedGoalsRouteImport } from './routes/_authenticated/goals'
 import { Route as AuthenticatedNotesIndexRouteImport } from './routes/_authenticated/notes/index'
@@ -59,11 +58,6 @@ const AuthenticatedPerformanceRoute =
     path: '/performance',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedPeopleRoute = AuthenticatedPeopleRouteImport.update({
-  id: '/people',
-  path: '/people',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
 const AuthenticatedHomeRoute = AuthenticatedHomeRouteImport.update({
   id: '/home',
   path: '/home',
@@ -102,7 +96,6 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/goals': typeof AuthenticatedGoalsRoute
   '/home': typeof AuthenticatedHomeRoute
-  '/people': typeof AuthenticatedPeopleRoute
   '/performance': typeof AuthenticatedPerformanceRoute
   '/planner': typeof AuthenticatedPlannerRoute
   '/profile': typeof AuthenticatedProfileRoute
@@ -117,7 +110,6 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/goals': typeof AuthenticatedGoalsRoute
   '/home': typeof AuthenticatedHomeRoute
-  '/people': typeof AuthenticatedPeopleRoute
   '/performance': typeof AuthenticatedPerformanceRoute
   '/planner': typeof AuthenticatedPlannerRoute
   '/profile': typeof AuthenticatedProfileRoute
@@ -134,7 +126,6 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/goals': typeof AuthenticatedGoalsRoute
   '/_authenticated/home': typeof AuthenticatedHomeRoute
-  '/_authenticated/people': typeof AuthenticatedPeopleRoute
   '/_authenticated/performance': typeof AuthenticatedPerformanceRoute
   '/_authenticated/planner': typeof AuthenticatedPlannerRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
@@ -151,7 +142,6 @@ export interface FileRouteTypes {
     | '/auth'
     | '/goals'
     | '/home'
-    | '/people'
     | '/performance'
     | '/planner'
     | '/profile'
@@ -166,7 +156,6 @@ export interface FileRouteTypes {
     | '/auth'
     | '/goals'
     | '/home'
-    | '/people'
     | '/performance'
     | '/planner'
     | '/profile'
@@ -182,7 +171,6 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_authenticated/goals'
     | '/_authenticated/home'
-    | '/_authenticated/people'
     | '/_authenticated/performance'
     | '/_authenticated/planner'
     | '/_authenticated/profile'
@@ -251,13 +239,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPerformanceRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/people': {
-      id: '/_authenticated/people'
-      path: '/people'
-      fullPath: '/people'
-      preLoaderRoute: typeof AuthenticatedPeopleRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/home': {
       id: '/_authenticated/home'
       path: '/home'
@@ -306,7 +287,6 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedGoalsRoute: typeof AuthenticatedGoalsRoute
   AuthenticatedHomeRoute: typeof AuthenticatedHomeRoute
-  AuthenticatedPeopleRoute: typeof AuthenticatedPeopleRoute
   AuthenticatedPerformanceRoute: typeof AuthenticatedPerformanceRoute
   AuthenticatedPlannerRoute: typeof AuthenticatedPlannerRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
@@ -319,7 +299,6 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedGoalsRoute: AuthenticatedGoalsRoute,
   AuthenticatedHomeRoute: AuthenticatedHomeRoute,
-  AuthenticatedPeopleRoute: AuthenticatedPeopleRoute,
   AuthenticatedPerformanceRoute: AuthenticatedPerformanceRoute,
   AuthenticatedPlannerRoute: AuthenticatedPlannerRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,

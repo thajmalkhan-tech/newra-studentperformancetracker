@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
-import { BookOpen, Calendar, FileText, Home, LineChart, LogOut, MessageSquare, MoreHorizontal, Target, User, Users } from "lucide-react";
+import { BookOpen, Calendar, FileText, Home, LineChart, LogOut, MessageSquare, MoreHorizontal, Target, User } from "lucide-react";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import type { ReactNode } from "react";
@@ -13,7 +13,6 @@ const nav = [
   { to: "/goals", label: "Goals", icon: Target },
   { to: "/notes", label: "Notes", icon: FileText },
   { to: "/performance", label: "Performance", icon: LineChart },
-  { to: "/people", label: "People", icon: Users },
   { to: "/profile", label: "Profile", icon: User },
 ] as const;
 
