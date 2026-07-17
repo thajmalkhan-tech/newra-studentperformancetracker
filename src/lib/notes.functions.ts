@@ -1,9 +1,15 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
-import { embedText } from "@/lib/embeddings.server";
-import { createLovableAiGatewayProvider, requireLovableApiKey } from "@/lib/ai-gateway.server";
-import { generateText } from "ai";
+
+async function loadAi() {
+  const [{ embedText }, { createLovableAiGatewayProvider, requireLovableApiKey }, { generateText }] = await Promise.all([
+    import("@/lib/embeddings.server"),
+    import("@/lib/ai-gateway.server"),
+    import("ai"),
+  ]);
+  return { embedText, createLovableAiGatewayProvider, requireLovableApiKey, generateText };
+}
 
 const uuid = z.string().uuid();
 
@@ -39,6 +45,7 @@ async function persistNote(opts: {
 
   const embeddings: number[][] = [];
   const batchSize = 20;
+  const { embedText } = await loadAi();
   for (let i = 0; i < chunks.length; i += batchSize) {
     const batch = chunks.slice(i, i + batchSize);
     const embs = await embedText(batch);
@@ -68,6 +75,7 @@ export const summarizeNote = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     const text = (chunks ?? []).map((c) => c.content).join("\n\n").slice(0, 12000);
     if (text.length < 20) throw new Error("Not enough content to summarize");
+    const { createLovableAiGatewayProvider, requireLovableApiKey, generateText } = await loadAi();
     const gateway = createLovableAiGatewayProvider(requireLovableApiKey());
     const { text: summary } = await generateText({
       model: gateway("google/gemini-2.5-flash"),
@@ -138,6 +146,7 @@ export const ingestNoteFile = createServerFn({ method: "POST" })
     }).parse(d),
   )
   .handler(async ({ context, data }) => {
+    const { requireLovableApiKey } = await loadAi();
     const apiKey = requireLovableApiKey();
     const storagePath = await uploadOriginal({
       supabase: context.supabase, userId: context.userId,
@@ -223,6 +232,7 @@ export const askNote = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({ noteId: uuid, question: z.string().min(2).max(2000) }).parse(d))
   .handler(async ({ context, data }) => {
+    const { embedText, createLovableAiGatewayProvider, requireLovableApiKey, generateText } = await loadAi();
     const [q] = await embedText(data.question);
     const { data: matches, error } = await context.supabase.rpc("match_note_chunks", {
       _user_id: context.userId, _note_id: data.noteId, _query: q as unknown as string, _match_count: 5,
@@ -244,6 +254,7 @@ export const generateQuiz = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     const { data: chunks } = await context.supabase.from("note_chunks").select("content").eq("note_id", data.noteId).order("chunk_index").limit(12);
     const context_text = (chunks ?? []).map((c) => c.content).join("\n\n").slice(0, 12000);
+    const { createLovableAiGatewayProvider, requireLovableApiKey, generateText } = await loadAi();
     const gateway = createLovableAiGatewayProvider(requireLovableApiKey());
     const { text } = await generateText({
       model: gateway("google/gemini-2.5-flash"),
