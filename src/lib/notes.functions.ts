@@ -190,15 +190,30 @@ export const getNote = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({ id: uuid }).parse(d))
   .handler(async ({ context, data }) => {
-    const { data: note, error } = await context.supabase.from("notes").select("id, title, summary, status, created_at").eq("id", data.id).maybeSingle();
+    const { data: note, error } = await context.supabase
+      .from("notes")
+      .select("id, title, summary, status, created_at, mime, storage_path")
+      .eq("id", data.id).maybeSingle();
     if (error) throw new Error(error.message);
-    return note;
+    if (!note) return null;
+    let fileUrl: string | null = null;
+    if (note.storage_path) {
+      const { data: signed } = await context.supabase.storage
+        .from("notes").createSignedUrl(note.storage_path, 60 * 60);
+      fileUrl = signed?.signedUrl ?? null;
+    }
+    return { ...note, file_url: fileUrl };
   });
 
 export const deleteNote = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({ id: uuid }).parse(d))
   .handler(async ({ context, data }) => {
+    const { data: existing } = await context.supabase
+      .from("notes").select("storage_path").eq("id", data.id).maybeSingle();
+    if (existing?.storage_path) {
+      await context.supabase.storage.from("notes").remove([existing.storage_path]);
+    }
     const { error } = await context.supabase.from("notes").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
