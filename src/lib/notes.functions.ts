@@ -146,6 +146,7 @@ export const ingestNoteFile = createServerFn({ method: "POST" })
     }).parse(d),
   )
   .handler(async ({ context, data }) => {
+    const { requireLovableApiKey } = await loadAi();
     const apiKey = requireLovableApiKey();
     const storagePath = await uploadOriginal({
       supabase: context.supabase, userId: context.userId,
