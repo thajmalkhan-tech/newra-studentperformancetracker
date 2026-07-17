@@ -121,7 +121,7 @@ function Performance() {
           </div>
         </div>
 
-        <section className="mt-6 grid gap-6 lg:grid-cols-2">
+        <section className="mt-6 grid gap-6">
           <div className="rounded-2xl border border-border bg-card p-5">
             <h2 className="mb-3 font-medium">Subjects</h2>
             <form onSubmit={(e) => { e.preventDefault(); if (newSubject.name.trim()) addSubject.mutate(); }} className="mb-4 flex flex-wrap gap-2">
@@ -181,40 +181,40 @@ function Performance() {
               {rows.length === 0 && <li className="py-6 text-center text-sm text-muted-foreground">No subjects yet.</li>}
             </ul>
 
-          </div>
-
-          <div className="rounded-2xl border border-border bg-card p-5">
-            <h2 className="mb-3 font-medium">Add a mark</h2>
-            <form onSubmit={(e) => { e.preventDefault(); if (newMark.subject_id && newMark.assessment && newMark.score) addMark.mutate(); }} className="mb-4 grid gap-2 md:grid-cols-2">
-              <select value={newMark.subject_id} onChange={(e) => setNewMark({ ...newMark, subject_id: e.target.value })} className="rounded-md border border-input bg-background px-3 py-2 text-sm">
-                <option value="">Select subject</option>
-                {(subjects ?? []).map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
-              </select>
-              <input value={newMark.assessment} onChange={(e) => setNewMark({ ...newMark, assessment: e.target.value })} placeholder="Assessment (e.g. Midterm)" className="rounded-md border border-input bg-background px-3 py-2 text-sm" />
-              <input value={newMark.score} onChange={(e) => setNewMark({ ...newMark, score: e.target.value })} placeholder="Score" className="rounded-md border border-input bg-background px-3 py-2 text-sm" />
-              <input value={newMark.max_score} onChange={(e) => setNewMark({ ...newMark, max_score: e.target.value })} placeholder="Max" className="rounded-md border border-input bg-background px-3 py-2 text-sm" />
-              <input value={newMark.weight} onChange={(e) => setNewMark({ ...newMark, weight: e.target.value })} placeholder="Weight" className="rounded-md border border-input bg-background px-3 py-2 text-sm" />
-              <button className="col-span-2 rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground">Add mark</button>
-            </form>
-            <ul className="divide-y divide-border">
-              {(marks ?? []).slice(-8).reverse().map((m) => {
-                const s = subjects?.find((x) => x.id === m.subject_id);
-                return (
-                  <li key={m.id} className="flex items-center justify-between py-2 text-sm">
-                    <div>
-                      <div className="font-medium">{m.assessment} · {s?.name ?? "—"}</div>
-                      <div className="text-xs text-muted-foreground">{new Date(m.recorded_at).toLocaleDateString()} · w{m.weight}</div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="text-sm">{m.score}/{m.max_score}</div>
-                      <button onClick={() => removeMark.mutate(m.id)} className="rounded p-1 text-muted-foreground hover:text-destructive"><Trash2 className="h-4 w-4" /></button>
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
+            <div className="mt-6 border-t border-border pt-4">
+              <h3 className="mb-3 text-sm font-medium">Add a mark</h3>
+              <form onSubmit={(e) => { e.preventDefault(); if (newMark.subject_id && newMark.assessment && newMark.score) addMark.mutate(); }} className="mb-4 grid gap-2 md:grid-cols-2">
+                <select value={newMark.subject_id} onChange={(e) => setNewMark({ ...newMark, subject_id: e.target.value })} className="rounded-md border border-input bg-background px-3 py-2 text-sm">
+                  <option value="">Select subject</option>
+                  {(subjects ?? []).map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+                </select>
+                <input value={newMark.assessment} onChange={(e) => setNewMark({ ...newMark, assessment: e.target.value })} placeholder="Assessment (e.g. Midterm)" className="rounded-md border border-input bg-background px-3 py-2 text-sm" />
+                <input value={newMark.score} onChange={(e) => setNewMark({ ...newMark, score: e.target.value })} placeholder="Score" className="rounded-md border border-input bg-background px-3 py-2 text-sm" />
+                <input value={newMark.max_score} onChange={(e) => setNewMark({ ...newMark, max_score: e.target.value })} placeholder="Max" className="rounded-md border border-input bg-background px-3 py-2 text-sm" />
+                <input value={newMark.weight} onChange={(e) => setNewMark({ ...newMark, weight: e.target.value })} placeholder="Weight" className="rounded-md border border-input bg-background px-3 py-2 text-sm" />
+                <button className="md:col-span-2 rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground">Add mark</button>
+              </form>
+              <ul className="divide-y divide-border">
+                {(marks ?? []).slice(-8).reverse().map((m) => {
+                  const s = subjects?.find((x) => x.id === m.subject_id);
+                  return (
+                    <li key={m.id} className="flex items-center justify-between py-2 text-sm">
+                      <div>
+                        <div className="font-medium">{m.assessment} · {s?.name ?? "—"}</div>
+                        <div className="text-xs text-muted-foreground">{new Date(m.recorded_at).toLocaleDateString()} · w{m.weight}</div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="text-sm">{m.score}/{m.max_score}</div>
+                        <button onClick={() => removeMark.mutate(m.id)} className="rounded p-1 text-muted-foreground hover:text-destructive"><Trash2 className="h-4 w-4" /></button>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
           </div>
         </section>
+
       </div>
     </AppShell>
   );
