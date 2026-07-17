@@ -77,6 +77,30 @@ export const summarizeNote = createServerFn({ method: "POST" })
     return { summary };
   });
 
+function base64ToBytes(b64: string): Uint8Array {
+  const bin = atob(b64);
+  const out = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+  return out;
+}
+
+async function uploadOriginal(opts: {
+  supabase: any;
+  userId: string;
+  filename: string;
+  mime: string;
+  base64: string;
+}): Promise<string> {
+  const safe = opts.filename.replace(/[^a-zA-Z0-9._-]+/g, "_").slice(0, 120) || "file";
+  const path = `${opts.userId}/${crypto.randomUUID()}-${safe}`;
+  const bytes = base64ToBytes(opts.base64);
+  const { error } = await opts.supabase.storage
+    .from("notes")
+    .upload(path, bytes, { contentType: opts.mime, upsert: false });
+  if (error) throw new Error(`Failed to upload file: ${error.message}`);
+  return path;
+}
+
 export const ingestNoteText = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
@@ -84,17 +108,24 @@ export const ingestNoteText = createServerFn({ method: "POST" })
       title: z.string().min(1).max(200),
       text: z.string().min(20).max(500000),
       mime: z.string().max(200).optional(),
+      filename: z.string().min(1).max(300).optional(),
+      base64: z.string().min(20).max(28_000_000).optional(),
     }).parse(d),
   )
-  .handler(async ({ context, data }) =>
-    persistNote({
-      supabase: context.supabase,
-      userId: context.userId,
-      title: data.title,
-      mime: data.mime ?? "text/plain",
-      text: data.text,
-    }),
-  );
+  .handler(async ({ context, data }) => {
+    const mime = data.mime ?? "text/plain";
+    let storagePath: string | null = null;
+    if (data.base64 && data.filename) {
+      storagePath = await uploadOriginal({
+        supabase: context.supabase, userId: context.userId,
+        filename: data.filename, mime, base64: data.base64,
+      });
+    }
+    return persistNote({
+      supabase: context.supabase, userId: context.userId,
+      title: data.title, mime, text: data.text, storagePath,
+    });
+  });
 
 export const ingestNoteFile = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -108,6 +139,10 @@ export const ingestNoteFile = createServerFn({ method: "POST" })
   )
   .handler(async ({ context, data }) => {
     const apiKey = requireLovableApiKey();
+    const storagePath = await uploadOriginal({
+      supabase: context.supabase, userId: context.userId,
+      filename: data.filename, mime: data.mime, base64: data.base64,
+    });
     const dataUrl = `data:${data.mime};base64,${data.base64}`;
     const isImage = data.mime.startsWith("image/");
     const content = isImage
@@ -137,11 +172,8 @@ export const ingestNoteFile = createServerFn({ method: "POST" })
     if (text.length < 20) throw new Error("Could not extract enough text from this file.");
 
     return persistNote({
-      supabase: context.supabase,
-      userId: context.userId,
-      title: data.title,
-      mime: data.mime,
-      text,
+      supabase: context.supabase, userId: context.userId,
+      title: data.title, mime: data.mime, text, storagePath,
     });
   });
 
