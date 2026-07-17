@@ -65,7 +65,18 @@ function NoteDetail() {
     <AppShell>
       <div className="p-6 pb-24 md:pb-6">
         <Link to="/notes" className="mb-4 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"><ArrowLeft className="h-4 w-4" /> All notes</Link>
-        <h1 className="text-2xl font-semibold font-display">{note?.title ?? "Loading…"}</h1>
+        <div className="flex items-start justify-between gap-3">
+          <h1 className="text-2xl font-semibold font-display">{note?.title ?? "Loading…"}</h1>
+          <button
+            onClick={() => {
+              if (confirm(`Delete "${note?.title ?? "this note"}"? This cannot be undone.`)) deleteM.mutate();
+            }}
+            disabled={deleteM.isPending || !note}
+            className="inline-flex shrink-0 items-center gap-1 rounded-md border border-input px-3 py-1.5 text-xs text-muted-foreground hover:border-destructive hover:bg-destructive/10 hover:text-destructive disabled:opacity-50"
+          >
+            {deleteM.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />} Delete
+          </button>
+        </div>
 
         <div className="mt-4 grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]">
           {/* Study viewer */}
