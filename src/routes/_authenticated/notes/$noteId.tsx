@@ -2,7 +2,7 @@ import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { AppShell } from "@/components/AppShell";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { askNote, generateQuiz, getNote } from "@/lib/notes.functions";
+import { askNote, generateQuiz, getNote, summarizeNote } from "@/lib/notes.functions";
 import { useState } from "react";
 import { ArrowLeft, Loader2, Send, Sparkle } from "lucide-react";
 import ReactMarkdown from "react-markdown";
