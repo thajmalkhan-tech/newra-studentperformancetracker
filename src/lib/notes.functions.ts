@@ -254,6 +254,7 @@ export const generateQuiz = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     const { data: chunks } = await context.supabase.from("note_chunks").select("content").eq("note_id", data.noteId).order("chunk_index").limit(12);
     const context_text = (chunks ?? []).map((c) => c.content).join("\n\n").slice(0, 12000);
+    const { createLovableAiGatewayProvider, requireLovableApiKey, generateText } = await loadAi();
     const gateway = createLovableAiGatewayProvider(requireLovableApiKey());
     const { text } = await generateText({
       model: gateway("google/gemini-2.5-flash"),
