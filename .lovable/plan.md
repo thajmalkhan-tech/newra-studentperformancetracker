@@ -1,29 +1,12 @@
-## Goal
+## Problem
+The mobile bottom nav in `src/components/AppShell.tsx` only renders the first 5 items (`nav.slice(0, 5)`) — Home, Chat, Planner, Goals, Notes. Performance, People, and Profile are unreachable on mobile.
 
-On the Performance page, turn the Subjects list into collapsible subject folders. Each subject becomes a folder button; expanding it reveals that subject's marks and an "Add mark" form scoped to it. Removes the shared "Add a mark" section at the bottom (subject is implicit per folder).
+## Fix
+Update the mobile nav in `src/components/AppShell.tsx`:
 
-## Changes — `src/routes/_authenticated/performance.tsx`
+1. Replace the 5-item slice with a 5-slot bar: 4 primary links (Home, Chat, Planner, Notes) + a "More" button that opens a sheet/drawer with the remaining items (Goals, Performance, People, Profile).
+2. The "More" trigger uses the `Menu` icon from lucide-react and shows an active state when the current route is one of the overflow items.
+3. Use the existing shadcn `Sheet` component (bottom side) to list the overflow links with icon + label; tapping a link closes the sheet.
+4. Also make the mobile top bar's "Sign out" area include a quick Profile link (tap avatar/name) so profile is one tap away.
 
-### Layout
-- Each subject row becomes a folder header (button) with: chevron icon, name (+ code), mark count, weighted % and GP on the right, plus the existing Edit / Delete icons.
-- Clicking the header toggles the folder open. Local `useState<Record<string, boolean>>` keyed by subject id; default all collapsed.
-- When open, the folder body shows:
-  - A compact "Add mark" form: assessment, score, max (default 100), weight (default 1), Add button. `subject_id` is fixed to that folder.
-  - A list of that subject's marks (assessment, date, weight, score/max, delete icon). Sorted newest first.
-  - Empty state: "No marks yet."
-
-### State
-- Replace the single `newMark` state with a per-subject draft map: `Record<string, { assessment: string; score: string; max_score: string; weight: string }>`. Helper to read/update by subject id.
-- `addMark` mutation takes the subject id + draft, resets that folder's draft on success.
-
-### Removed
-- The standalone "Add a mark" section and the "Recent marks" list under it (their functionality now lives inside each folder).
-
-### Kept as-is
-- Subjects create form at the top of the card, subject edit/delete, GPA/trend cards, all queries and mutations for `subjects` and `marks`, all RLS-backed data flow.
-
-## Not changed
-- Database schema, RLS, `notes` section — no migrations.
-
-## Out of scope
-- Drag-to-reorder subjects, bulk mark import.
+No other files change. No routing, data, or backend changes.
