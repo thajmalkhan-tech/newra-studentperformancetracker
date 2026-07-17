@@ -15,13 +15,25 @@ export const Route = createFileRoute("/_authenticated/notes/$noteId")({
 
 function NoteDetail() {
   const { noteId } = useParams({ from: "/_authenticated/notes/$noteId" });
+  const nav = useNavigate();
   const get = useServerFn(getNote);
   const ask = useServerFn(askNote);
   const quiz = useServerFn(generateQuiz);
   const summarize = useServerFn(summarizeNote);
+  const removeFn = useServerFn(deleteNote);
   const qc = useQueryClient();
 
   const { data: note } = useQuery({ queryKey: ["note", noteId], queryFn: () => get({ data: { id: noteId } }) });
+
+  const deleteM = useMutation({
+    mutationFn: async () => removeFn({ data: { id: noteId } }),
+    onSuccess: () => {
+      toast.success("Note deleted");
+      qc.invalidateQueries({ queryKey: ["notes"] });
+      nav({ to: "/notes" });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
 
   const summarizeM = useMutation({
     mutationFn: async () => summarize({ data: { id: noteId } }),
