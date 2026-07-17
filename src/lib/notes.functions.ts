@@ -45,6 +45,7 @@ async function persistNote(opts: {
 
   const embeddings: number[][] = [];
   const batchSize = 20;
+  const { embedText } = await loadAi();
   for (let i = 0; i < chunks.length; i += batchSize) {
     const batch = chunks.slice(i, i + batchSize);
     const embs = await embedText(batch);
