@@ -1,8 +1,9 @@
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
 import { AppShell } from "@/components/AppShell";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { askNote, generateQuiz, getNote } from "@/lib/notes.functions";
+import { askNote, generateQuiz, getNote, summarizeNote } from "@/lib/notes.functions";
 import { useState } from "react";
 import { ArrowLeft, Loader2, Send, Sparkle } from "lucide-react";
 import ReactMarkdown from "react-markdown";
@@ -16,8 +17,15 @@ function NoteDetail() {
   const get = useServerFn(getNote);
   const ask = useServerFn(askNote);
   const quiz = useServerFn(generateQuiz);
+  const summarize = useServerFn(summarizeNote);
+  const qc = useQueryClient();
 
   const { data: note } = useQuery({ queryKey: ["note", noteId], queryFn: () => get({ data: { id: noteId } }) });
+
+  const summarizeM = useMutation({
+    mutationFn: async () => summarize({ data: { id: noteId } }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["note", noteId] }),
+  });
 
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState<string | null>(null);
@@ -37,12 +45,20 @@ function NoteDetail() {
         <Link to="/notes" className="mb-4 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"><ArrowLeft className="h-4 w-4" /> All notes</Link>
         <h1 className="text-2xl font-semibold font-display">{note?.title ?? "Loading…"}</h1>
 
-        {note?.summary && (
-          <section className="mt-4 rounded-2xl border border-border bg-card p-5">
-            <h2 className="mb-2 flex items-center gap-2 text-sm font-medium"><Sparkle className="h-4 w-4 text-primary" /> Summary</h2>
-            <div className="prose prose-sm max-w-none"><ReactMarkdown>{note.summary}</ReactMarkdown></div>
-          </section>
-        )}
+        <section className="mt-4 rounded-2xl border border-border bg-card p-5">
+          <div className="flex items-center justify-between">
+            <h2 className="flex items-center gap-2 text-sm font-medium"><Sparkle className="h-4 w-4 text-primary" /> Summary</h2>
+            <button onClick={() => summarizeM.mutate()} disabled={summarizeM.isPending} className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground disabled:opacity-50">
+              {summarizeM.isPending ? "Summarizing…" : note?.summary ? "Regenerate summary" : "Summarize"}
+            </button>
+          </div>
+          {note?.summary ? (
+            <div className="prose prose-sm mt-3 max-w-none"><ReactMarkdown>{note.summary}</ReactMarkdown></div>
+          ) : (
+            <p className="mt-3 text-sm text-muted-foreground">No summary yet. Click Summarize to generate one.</p>
+          )}
+        </section>
+
 
         <section className="mt-6 rounded-2xl border border-border bg-card p-5">
           <h2 className="mb-3 text-sm font-medium">Ask about this note</h2>
