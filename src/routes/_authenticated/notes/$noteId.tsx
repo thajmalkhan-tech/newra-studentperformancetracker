@@ -1,12 +1,13 @@
-import { createFileRoute, Link, useParams } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate, useParams } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { AppShell } from "@/components/AppShell";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { askNote, generateQuiz, getNote, summarizeNote } from "@/lib/notes.functions";
+import { askNote, deleteNote, generateQuiz, getNote, summarizeNote } from "@/lib/notes.functions";
 import { useState } from "react";
-import { ArrowLeft, Download, FileText, Loader2, Send, Sparkle } from "lucide-react";
+import { ArrowLeft, Download, FileText, Loader2, Send, Sparkle, Trash2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/notes/$noteId")({
   component: NoteDetail,
