@@ -1,0 +1,1 @@
+ALTER TABLE public.profiles DROP COLUMN IF EXISTS bio; ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS contact_email text, ADD COLUMN IF NOT EXISTS emergency_contact_name text, ADD COLUMN IF NOT EXISTS emergency_contact_phone text, ADD COLUMN IF NOT EXISTS address text;

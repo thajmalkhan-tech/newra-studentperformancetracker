@@ -229,10 +229,13 @@ export type Database = {
       }
       profiles: {
         Row: {
+          address: string | null
           avatar_url: string | null
-          bio: string | null
+          contact_email: string | null
           created_at: string
           date_of_birth: string | null
+          emergency_contact_name: string | null
+          emergency_contact_phone: string | null
           full_name: string | null
           institution: string | null
           location: string | null
@@ -243,10 +246,13 @@ export type Database = {
           year_of_study: string | null
         }
         Insert: {
+          address?: string | null
           avatar_url?: string | null
-          bio?: string | null
+          contact_email?: string | null
           created_at?: string
           date_of_birth?: string | null
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
           full_name?: string | null
           institution?: string | null
           location?: string | null
@@ -257,10 +263,13 @@ export type Database = {
           year_of_study?: string | null
         }
         Update: {
+          address?: string | null
           avatar_url?: string | null
-          bio?: string | null
+          contact_email?: string | null
           created_at?: string
           date_of_birth?: string | null
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
           full_name?: string | null
           institution?: string | null
           location?: string | null
