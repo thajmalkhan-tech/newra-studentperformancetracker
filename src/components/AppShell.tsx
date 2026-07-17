@@ -1,5 +1,7 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
-import { BookOpen, Calendar, FileText, Home, LineChart, LogOut, MessageSquare, Target, User, Users } from "lucide-react";
+import { BookOpen, Calendar, FileText, Home, LineChart, LogOut, MessageSquare, MoreHorizontal, Target, User, Users } from "lucide-react";
+import { useState } from "react";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import type { ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
