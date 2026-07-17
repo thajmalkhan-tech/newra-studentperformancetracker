@@ -232,6 +232,7 @@ export const askNote = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({ noteId: uuid, question: z.string().min(2).max(2000) }).parse(d))
   .handler(async ({ context, data }) => {
+    const { embedText, createLovableAiGatewayProvider, requireLovableApiKey, generateText } = await loadAi();
     const [q] = await embedText(data.question);
     const { data: matches, error } = await context.supabase.rpc("match_note_chunks", {
       _user_id: context.userId, _note_id: data.noteId, _query: q as unknown as string, _match_count: 5,
