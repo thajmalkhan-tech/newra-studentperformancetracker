@@ -55,11 +55,6 @@ function NotesIndex() {
   }
 
   async function handleFile(f: File) {
-    const maxBytes = 20 * 1024 * 1024;
-    if (f.size > maxBytes) {
-      toast.error("File is larger than 20MB.");
-      return;
-    }
     const cleanTitle = f.name.replace(/\.[^.]+$/, "");
     const isTextLike = f.type.startsWith("text/") || TEXT_EXT.test(f.name);
     if (isTextLike) {
