@@ -21,6 +21,10 @@ export function AppShell({ children }: { children: ReactNode }) {
   const loc = useLocation();
   const navigate = useNavigate();
   const qc = useQueryClient();
+  const [moreOpen, setMoreOpen] = useState(false);
+  const primary = nav.slice(0, 4);
+  const overflow = nav.slice(4);
+  const overflowActive = overflow.some((i) => loc.pathname === i.to || loc.pathname.startsWith(i.to + "/"));
 
   const { data: profile } = useQuery({
     queryKey: ["me"],
