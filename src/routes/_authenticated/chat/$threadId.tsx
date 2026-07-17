@@ -177,7 +177,7 @@ function ChatPage() {
             </div>
           </div>
 
-          <form onSubmit={submit} className="border-t border-border bg-background p-4">
+          <form onSubmit={submit} className="border-t border-border bg-background p-4 pb-20 md:pb-4">
             <div className="mx-auto flex max-w-3xl items-end gap-2 rounded-2xl border border-input bg-card p-2">
               <textarea
                 ref={inputRef}
