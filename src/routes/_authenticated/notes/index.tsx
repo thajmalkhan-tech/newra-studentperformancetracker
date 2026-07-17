@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { AppShell, PageHeader } from "@/components/AppShell";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { listNotes, ingestNoteText, deleteNote } from "@/lib/notes.functions";
+import { listNotes, ingestNoteText, ingestNoteFile, deleteNote } from "@/lib/notes.functions";
 import { FileText, Loader2, Plus, Trash2, Upload } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
