@@ -75,6 +75,7 @@ export const summarizeNote = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     const text = (chunks ?? []).map((c) => c.content).join("\n\n").slice(0, 12000);
     if (text.length < 20) throw new Error("Not enough content to summarize");
+    const { createLovableAiGatewayProvider, requireLovableApiKey, generateText } = await loadAi();
     const gateway = createLovableAiGatewayProvider(requireLovableApiKey());
     const { text: summary } = await generateText({
       model: gateway("google/gemini-2.5-flash"),
