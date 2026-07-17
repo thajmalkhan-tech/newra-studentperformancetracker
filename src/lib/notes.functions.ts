@@ -1,9 +1,15 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
-import { embedText } from "@/lib/embeddings.server";
-import { createLovableAiGatewayProvider, requireLovableApiKey } from "@/lib/ai-gateway.server";
-import { generateText } from "ai";
+
+async function loadAi() {
+  const [{ embedText }, { createLovableAiGatewayProvider, requireLovableApiKey }, { generateText }] = await Promise.all([
+    import("@/lib/embeddings.server"),
+    import("@/lib/ai-gateway.server"),
+    import("ai"),
+  ]);
+  return { embedText, createLovableAiGatewayProvider, requireLovableApiKey, generateText };
+}
 
 const uuid = z.string().uuid();
 
