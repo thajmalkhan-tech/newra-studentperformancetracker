@@ -14,10 +14,19 @@ export const listMyLinkedStudents = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const { data: links, error } = await context.supabase
       .from("student_links")
-      .select("student_id, relation, profiles!student_links_student_id_fkey(full_name, avatar_url)")
+      .select("student_id, relation")
       .eq("viewer_id", context.userId);
     if (error) throw new Error(error.message);
-    return links;
+    const ids = (links ?? []).map((l) => l.student_id);
+    if (ids.length === 0) return [];
+    const { data: profiles } = await context.supabase
+      .from("profiles")
+      .select("user_id, full_name, avatar_url")
+      .in("user_id", ids);
+    return (links ?? []).map((l) => ({
+      ...l,
+      profiles: profiles?.find((p) => p.user_id === l.student_id) ?? null,
+    }));
   });
 
 // Admin-only: list users
