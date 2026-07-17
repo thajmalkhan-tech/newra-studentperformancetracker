@@ -17,8 +17,15 @@ function NoteDetail() {
   const get = useServerFn(getNote);
   const ask = useServerFn(askNote);
   const quiz = useServerFn(generateQuiz);
+  const summarize = useServerFn(summarizeNote);
+  const qc = useQueryClient();
 
   const { data: note } = useQuery({ queryKey: ["note", noteId], queryFn: () => get({ data: { id: noteId } }) });
+
+  const summarizeM = useMutation({
+    mutationFn: async () => summarize({ data: { id: noteId } }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["note", noteId] }),
+  });
 
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState<string | null>(null);
