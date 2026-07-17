@@ -59,9 +59,29 @@ function NotesIndex() {
     const isTextLike = f.type.startsWith("text/") || TEXT_EXT.test(f.name);
     if (isTextLike) {
       const t = await f.text();
+      const base64 = await fileToBase64(f);
       setTitle(cleanTitle);
       setText(t);
       setOpen(true);
+      // Kick off ingest immediately so the original file is saved for study view.
+      try {
+        setUploading(true);
+        const res = await ingest({
+          data: {
+            title: cleanTitle, text: t,
+            mime: f.type || "text/plain",
+            filename: f.name, base64,
+          },
+        });
+        toast.success("Note indexed");
+        qc.invalidateQueries({ queryKey: ["notes"] });
+        setOpen(false);
+        nav({ to: "/notes/$noteId", params: { noteId: res.id } });
+      } catch (e) {
+        toast.error(e instanceof Error ? e.message : String(e));
+      } finally {
+        setUploading(false);
+      }
       return;
     }
     try {
