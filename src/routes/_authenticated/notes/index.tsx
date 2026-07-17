@@ -141,7 +141,15 @@ function NotesIndex() {
                 <p className="mt-1 line-clamp-3 text-sm text-muted-foreground">{n.summary ?? (n.status === "processing" ? "Indexing…" : "Ready")}</p>
               </Link>
               <div className="mt-3 flex justify-end">
-                <button onClick={() => del.mutate(n.id)} className="rounded p-1.5 text-muted-foreground opacity-0 hover:bg-destructive/10 hover:text-destructive group-hover:opacity-100"><Trash2 className="h-4 w-4" /></button>
+                <button
+                  onClick={() => {
+                    if (confirm(`Delete "${n.title}"? This cannot be undone.`)) del.mutate(n.id);
+                  }}
+                  aria-label="Delete note"
+                  className="inline-flex items-center gap-1 rounded-md border border-input px-2 py-1 text-xs text-muted-foreground hover:border-destructive hover:bg-destructive/10 hover:text-destructive"
+                >
+                  <Trash2 className="h-3.5 w-3.5" /> Delete
+                </button>
               </div>
             </div>
           ))}
