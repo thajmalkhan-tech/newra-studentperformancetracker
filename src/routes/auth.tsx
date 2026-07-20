@@ -77,7 +77,7 @@ function AuthPage() {
       <div className="hidden bg-gradient-to-br from-primary/90 to-primary p-12 text-primary-foreground md:flex md:flex-col md:justify-between">
         <Link to="/" className="flex items-center gap-2">
           <BookOpen className="h-6 w-6" />
-          <span className="text-lg font-semibold font-display">Sage</span>
+          <span className="text-lg font-semibold font-display">THE NEW COLLEGE</span>
         </Link>
         <div>
           <h2 className="text-4xl font-semibold font-display leading-tight">Study smarter with a companion that knows your notes.</h2>
