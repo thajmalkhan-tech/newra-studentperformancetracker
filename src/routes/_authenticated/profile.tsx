@@ -203,7 +203,7 @@ function ProfilePage() {
         </form>
 
         <div className="mx-auto mt-8 max-w-3xl">
-          <section className="rounded-2xl border border-destructive/40 bg-destructive/5 p-5">
+          <section id="danger-zone" className="rounded-2xl border border-destructive/40 bg-destructive/5 p-5">
             <h2 className="flex items-center gap-2 font-medium text-destructive"><Trash2 className="h-4 w-4" /> Danger zone</h2>
             <p className="mt-1 text-sm text-muted-foreground">
               Permanently delete your account and all associated data. This cannot be undone.
