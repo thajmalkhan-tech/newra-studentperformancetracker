@@ -68,7 +68,7 @@ function Landing() {
       </main>
 
       <footer className="border-t border-border py-6 text-center text-xs text-muted-foreground">
-        © {new Date().getFullYear()} Sage. Built for students.
+        © {new Date().getFullYear()} THE NEW COLLEGE. Built for students.
       </footer>
     </div>
   );
