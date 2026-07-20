@@ -86,7 +86,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
             <BookOpen className="h-4 w-4" />
           </div>
-          <span className="font-semibold">Sage</span>
+          <span className="font-semibold">THE NEW COLLEGE</span>
         </div>
         <button onClick={signOut} className="text-sm text-muted-foreground">Sign out</button>
       </div>
