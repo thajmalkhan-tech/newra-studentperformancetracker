@@ -65,12 +65,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "NEWRA — Your Personal Study Advisor" },
+      { title: "NEWRA — Students Performance Tracker" },
       { name: "description", content: "An AI-powered companion for students: chat, plan, learn from your notes, and track academic progress." },
-      { property: "og:title", content: "NEWRA — Your Personal Study Advisor" },
+      { property: "og:title", content: "NEWRA — Students Performance Tracker" },
       { property: "og:description", content: "An AI-powered companion for students: chat, plan, learn from your notes, and track academic progress." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "NEWRA — Students Performance Tracker" },
+      { name: "twitter:description", content: "An AI-powered companion for students: chat, plan, learn from your notes, and track academic progress." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/d66d4fa9-7f9e-4012-83ab-f2714fd94efe/id-preview-75cc9d34--8710030c-442c-4994-8a5f-e41b8165ea55.lovable.app-1784518332318.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/d66d4fa9-7f9e-4012-83ab-f2714fd94efe/id-preview-75cc9d34--8710030c-442c-4994-8a5f-e41b8165ea55.lovable.app-1784518332318.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
