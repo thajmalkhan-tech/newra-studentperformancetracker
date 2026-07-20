@@ -44,7 +44,23 @@ const EMPTY: ProfileForm = {
 
 function ProfilePage() {
   const qc = useQueryClient();
+  const navigate = useNavigate();
   const [form, setForm] = useState<ProfileForm>(EMPTY);
+  const [confirmText, setConfirmText] = useState("");
+  const [showDelete, setShowDelete] = useState(false);
+  const deleteFn = useServerFn(deleteMyAccount);
+
+  const del = useMutation({
+    mutationFn: async () => { await deleteFn({}); },
+    onSuccess: async () => {
+      toast.success("Account deleted");
+      await qc.cancelQueries();
+      qc.clear();
+      await supabase.auth.signOut();
+      navigate({ to: "/auth", replace: true });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
 
   const { data } = useQuery({
     queryKey: ["profile-me"],
