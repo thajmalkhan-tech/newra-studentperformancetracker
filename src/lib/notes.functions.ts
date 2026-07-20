@@ -242,7 +242,7 @@ export const askNote = createServerFn({ method: "POST" })
     const gateway = createLovableAiGatewayProvider(requireLovableApiKey());
     const { text } = await generateText({
       model: gateway("google/gemini-2.5-flash"),
-      system: "You are Sage, a study tutor. Answer using ONLY the provided context. If it doesn't contain the answer, say so honestly. Cite chunk numbers like [1].",
+      system: "You are NEWRA, a study tutor. Answer using ONLY the provided context. If it doesn't contain the answer, say so honestly. Cite chunk numbers like [1].",
       prompt: `Context:\n${ctx}\n\nQuestion: ${data.question}`,
     });
     return { answer: text };

@@ -59,7 +59,7 @@ function HomePage() {
           <Stat label="GPA" value={(data?.gpa ?? 0).toFixed(2)} hint="Weighted, 10-scale" icon={TrendingUp} />
           <Link to="/chat" className="rounded-2xl border border-border bg-primary/5 p-5 hover:bg-primary/10">
             <MessageSquare className="h-4 w-4 text-primary" />
-            <div className="mt-3 font-medium">Ask Sage</div>
+            <div className="mt-3 font-medium">Ask NEWRA</div>
             <div className="mt-1 text-xs text-muted-foreground">Start a new conversation</div>
           </Link>
         </div>
@@ -84,7 +84,7 @@ function HomePage() {
           <div className="rounded-2xl border border-border bg-card p-5">
             <h2 className="font-semibold">Study tip</h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              Spaced repetition beats cramming. Ask Sage to build you a review schedule for anything you're learning this week.
+              Spaced repetition beats cramming. Ask NEWRA to build you a review schedule for anything you're learning this week.
             </p>
             <Link to="/chat" className="mt-4 inline-flex rounded-md bg-primary px-3 py-2 text-xs font-medium text-primary-foreground hover:opacity-90">Plan my week</Link>
           </div>

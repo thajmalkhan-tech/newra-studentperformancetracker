@@ -106,7 +106,7 @@ function NotesIndex() {
     <AppShell>
       <PageHeader
         title="Notes"
-        subtitle="Upload or paste notes. Sage indexes them so you can ask questions and generate quizzes."
+        subtitle="Upload or paste notes. NEWRA indexes them so you can ask questions and generate quizzes."
         actions={<button onClick={() => setOpen(true)} className="flex items-center gap-1 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90"><Plus className="h-4 w-4" /> Add notes</button>}
       />
       <div className="p-6 pb-24 md:pb-6">

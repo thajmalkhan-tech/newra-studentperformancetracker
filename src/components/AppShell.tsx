@@ -50,7 +50,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground">
             <BookOpen className="h-5 w-5" />
           </div>
-          <span className="text-lg font-semibold font-display">THE NEW COLLEGE</span>
+          <span className="text-lg font-semibold font-display">NEWRA</span>
         </div>
         <nav className="flex-1 space-y-1 px-3">
           {nav.map((item) => {
@@ -86,7 +86,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
             <BookOpen className="h-4 w-4" />
           </div>
-          <span className="font-semibold">THE NEW COLLEGE</span>
+          <span className="font-semibold">NEWRA</span>
         </div>
         <button onClick={signOut} className="text-sm text-muted-foreground">Sign out</button>
       </div>
