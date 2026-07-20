@@ -1,12 +1,16 @@
-## Problem
-The mobile bottom nav in `src/components/AppShell.tsx` only renders the first 5 items (`nav.slice(0, 5)`) — Home, Chat, Planner, Goals, Notes. Performance, People, and Profile are unreachable on mobile.
+Rename the app brand from "Sage" to "THE NEW COLLEGE" everywhere it appears in the UI.
 
-## Fix
-Update the mobile nav in `src/components/AppShell.tsx`:
+## Changes
 
-1. Replace the 5-item slice with a 5-slot bar: 4 primary links (Home, Chat, Planner, Notes) + a "More" button that opens a sheet/drawer with the remaining items (Goals, Performance, People, Profile).
-2. The "More" trigger uses the `Menu` icon from lucide-react and shows an active state when the current route is one of the overflow items.
-3. Use the existing shadcn `Sheet` component (bottom side) to list the overflow links with icon + label; tapping a link closes the sheet.
-4. Also make the mobile top bar's "Sign out" area include a quick Profile link (tap avatar/name) so profile is one tap away.
+1. `src/components/AppShell.tsx`
+   - Desktop sidebar header brand (line ~53): `Sage` → `THE NEW COLLEGE`
+   - Mobile top bar brand: `Sage` → `THE NEW COLLEGE`
 
-No other files change. No routing, data, or backend changes.
+2. `src/routes/index.tsx` (landing page)
+   - Header logo text: `Sage` → `THE NEW COLLEGE`
+   - Footer copyright: `© {year} Sage.` → `© {year} THE NEW COLLEGE.`
+
+3. `src/routes/__root.tsx`
+   - Update page `<title>` / meta description / og:title if they reference "Sage" so the browser tab and social preview match the new name.
+
+No changes to routes, data, or logic. Logo icon (BookOpen) stays. If you'd prefer a shorter display like "The New College" (mixed case) instead of all-caps, say the word and I'll adjust.
