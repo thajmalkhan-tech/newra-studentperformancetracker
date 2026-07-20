@@ -128,7 +128,7 @@ function AuthPage() {
           </form>
 
           <p className="mt-4 text-center text-sm text-muted-foreground">
-            {mode === "sign-in" ? "New to Sage?" : "Already have an account?"}{" "}
+            {mode === "sign-in" ? "New to THE NEW COLLEGE?" : "Already have an account?"}{" "}
             <button className="text-primary hover:underline" onClick={() => setMode(mode === "sign-in" ? "sign-up" : "sign-in")}>
               {mode === "sign-in" ? "Create an account" : "Sign in"}
             </button>
