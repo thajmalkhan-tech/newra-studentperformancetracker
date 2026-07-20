@@ -77,13 +77,13 @@ function AuthPage() {
       <div className="hidden bg-gradient-to-br from-primary/90 to-primary p-12 text-primary-foreground md:flex md:flex-col md:justify-between">
         <Link to="/" className="flex items-center gap-2">
           <BookOpen className="h-6 w-6" />
-          <span className="text-lg font-semibold font-display">Sage</span>
+          <span className="text-lg font-semibold font-display">THE NEW COLLEGE</span>
         </Link>
         <div>
           <h2 className="text-4xl font-semibold font-display leading-tight">Study smarter with a companion that knows your notes.</h2>
           <p className="mt-4 text-sm opacity-80">Chat, plan, and track your academic progress in one calm space.</p>
         </div>
-        <p className="text-xs opacity-70">© Sage</p>
+        <p className="text-xs opacity-70">© THE NEW COLLEGE</p>
       </div>
 
       <div className="flex items-center justify-center p-6">
@@ -128,7 +128,7 @@ function AuthPage() {
           </form>
 
           <p className="mt-4 text-center text-sm text-muted-foreground">
-            {mode === "sign-in" ? "New to Sage?" : "Already have an account?"}{" "}
+            {mode === "sign-in" ? "New to THE NEW COLLEGE?" : "Already have an account?"}{" "}
             <button className="text-primary hover:underline" onClick={() => setMode(mode === "sign-in" ? "sign-up" : "sign-in")}>
               {mode === "sign-in" ? "Create an account" : "Sign in"}
             </button>
