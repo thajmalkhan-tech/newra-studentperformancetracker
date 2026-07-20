@@ -25,7 +25,7 @@ function Landing() {
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground">
             <BookOpen className="h-5 w-5" />
           </div>
-          <span className="text-lg font-semibold font-display">Sage</span>
+          <span className="text-lg font-semibold font-display">THE NEW COLLEGE</span>
         </Link>
         <nav className="flex items-center gap-2">
           <Link to="/auth" className="rounded-md px-3 py-2 text-sm hover:bg-secondary">Sign in</Link>
