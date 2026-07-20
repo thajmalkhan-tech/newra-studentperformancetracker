@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
-import { BookOpen, Calendar, FileText, Home, LineChart, LogOut, MessageSquare, MoreHorizontal, Target, User } from "lucide-react";
+import { BookOpen, Calendar, FileText, Home, LineChart, LogOut, MessageSquare, MoreHorizontal, Target, Trash2, User } from "lucide-react";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import type { ReactNode } from "react";
