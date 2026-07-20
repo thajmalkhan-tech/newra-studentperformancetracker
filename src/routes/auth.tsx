@@ -83,7 +83,7 @@ function AuthPage() {
           <h2 className="text-4xl font-semibold font-display leading-tight">Study smarter with a companion that knows your notes.</h2>
           <p className="mt-4 text-sm opacity-80">Chat, plan, and track your academic progress in one calm space.</p>
         </div>
-        <p className="text-xs opacity-70">© Sage</p>
+        <p className="text-xs opacity-70">© THE NEW COLLEGE</p>
       </div>
 
       <div className="flex items-center justify-center p-6">
