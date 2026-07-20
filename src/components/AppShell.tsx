@@ -146,6 +146,14 @@ export function AppShell({ children }: { children: ReactNode }) {
               >
                 <LogOut className="h-4 w-4" /> Sign out
               </button>
+              <Link
+                to="/profile"
+                hash="danger-zone"
+                onClick={() => setMoreOpen(false)}
+                className="col-span-2 flex items-center justify-center gap-2 rounded-md border border-destructive/40 px-3 py-3 text-sm text-destructive hover:bg-destructive/10"
+              >
+                <Trash2 className="h-4 w-4" /> Delete account
+              </Link>
             </div>
           </SheetContent>
         </Sheet>
