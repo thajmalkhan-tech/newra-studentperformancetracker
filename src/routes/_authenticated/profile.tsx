@@ -1,10 +1,12 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { AppShell, PageHeader } from "@/components/AppShell";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { User, Phone } from "lucide-react";
+import { User, Phone, Trash2 } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { deleteMyAccount } from "@/lib/account.functions";
 
 export const Route = createFileRoute("/_authenticated/profile")({
   component: ProfilePage,
@@ -42,7 +44,23 @@ const EMPTY: ProfileForm = {
 
 function ProfilePage() {
   const qc = useQueryClient();
+  const navigate = useNavigate();
   const [form, setForm] = useState<ProfileForm>(EMPTY);
+  const [confirmText, setConfirmText] = useState("");
+  const [showDelete, setShowDelete] = useState(false);
+  const deleteFn = useServerFn(deleteMyAccount);
+
+  const del = useMutation({
+    mutationFn: async () => { await deleteFn({}); },
+    onSuccess: async () => {
+      toast.success("Account deleted");
+      await qc.cancelQueries();
+      qc.clear();
+      await supabase.auth.signOut();
+      navigate({ to: "/auth", replace: true });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
 
   const { data } = useQuery({
     queryKey: ["profile-me"],
@@ -183,6 +201,51 @@ function ProfilePage() {
             </button>
           </div>
         </form>
+
+        <div className="mx-auto mt-8 max-w-3xl">
+          <section className="rounded-2xl border border-destructive/40 bg-destructive/5 p-5">
+            <h2 className="flex items-center gap-2 font-medium text-destructive"><Trash2 className="h-4 w-4" /> Danger zone</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Permanently delete your account and all associated data. This cannot be undone.
+            </p>
+            {!showDelete ? (
+              <button
+                type="button"
+                onClick={() => setShowDelete(true)}
+                className="mt-4 rounded-md border border-destructive px-4 py-2 text-sm font-medium text-destructive hover:bg-destructive hover:text-destructive-foreground"
+              >
+                Delete account
+              </button>
+            ) : (
+              <div className="mt-4 space-y-3">
+                <p className="text-sm">Type <span className="font-mono font-semibold">DELETE</span> to confirm.</p>
+                <input
+                  value={confirmText}
+                  onChange={(e) => setConfirmText(e.target.value)}
+                  className={input}
+                  placeholder="DELETE"
+                />
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    disabled={confirmText !== "DELETE" || del.isPending}
+                    onClick={() => del.mutate()}
+                    className="rounded-md bg-destructive px-4 py-2 text-sm font-medium text-destructive-foreground hover:opacity-90 disabled:opacity-60"
+                  >
+                    {del.isPending ? "Deleting…" : "Permanently delete"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setShowDelete(false); setConfirmText(""); }}
+                    className="rounded-md border border-input px-4 py-2 text-sm hover:bg-secondary"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
+          </section>
+        </div>
       </div>
     </AppShell>
   );
