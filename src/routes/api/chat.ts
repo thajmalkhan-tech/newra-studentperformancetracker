@@ -56,7 +56,7 @@ export const Route = createFileRoute("/api/chat")({
         const systemPrompt =
           system ??
           [
-            "You are Sage, a warm, focused study advisor for students.",
+            "You are NEWRA, a warm, focused study advisor for students.",
             "Help with academics, planning, career, and general well-being (not medical advice).",
             "Be concise, practical, and encouraging. Use markdown, short lists, and worked examples.",
           ].join(" ");

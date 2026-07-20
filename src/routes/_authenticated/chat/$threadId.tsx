@@ -140,7 +140,7 @@ function ChatPage() {
             <div className="mx-auto max-w-3xl space-y-6">
               {messages.length === 0 && (
                 <div className="pt-10 text-center">
-                  <h2 className="text-3xl font-semibold font-display">How can Sage help today?</h2>
+                  <h2 className="text-3xl font-semibold font-display">How can NEWRA help today?</h2>
                   <p className="mt-2 text-sm text-muted-foreground">Ask about coursework, plan your week, or brainstorm a project.</p>
                   <div className="mx-auto mt-6 grid max-w-xl gap-2 sm:grid-cols-2">
                     {["Create a study plan for next week", "Explain backpropagation simply", "Recommend a portfolio project", "How do I prepare for finals?"].map((s) => (
@@ -171,7 +171,7 @@ function ChatPage() {
               {isLoading && (
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <div className="h-2 w-2 animate-pulse rounded-full bg-primary" />
-                  Sage is thinking…
+                  NEWRA is thinking…
                 </div>
               )}
             </div>
@@ -184,7 +184,7 @@ function ChatPage() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); submit(); } }}
-                placeholder="Ask Sage anything…"
+                placeholder="Ask NEWRA anything…"
                 rows={1}
                 className="flex-1 resize-none bg-transparent px-3 py-2 text-sm outline-none"
               />
