@@ -54,12 +54,23 @@ function NoteDetail() {
 
   const mime = note?.mime ?? "";
   const fileUrl = note?.file_url ?? null;
+  const downloadUrl = note?.download_url ?? fileUrl;
   const isImage = mime.startsWith("image/");
   const isPdf = mime === "application/pdf";
   const isAudio = mime.startsWith("audio/");
   const isVideo = mime.startsWith("video/");
   const isTextish = mime.startsWith("text/") || /json|xml|yaml|markdown|csv/.test(mime);
-  const canEmbed = isImage || isPdf || isAudio || isVideo || isTextish;
+  const canPreview = isImage || isPdf || isAudio || isVideo || isTextish;
+
+  const { data: textContent, isLoading: textLoading } = useQuery({
+    queryKey: ["note-text", noteId, fileUrl],
+    enabled: Boolean(fileUrl && isTextish),
+    queryFn: async () => {
+      const res = await fetch(fileUrl!);
+      if (!res.ok) throw new Error("Could not load file");
+      return (await res.text()).slice(0, 500000);
+    },
+  });
 
   return (
     <AppShell>
@@ -84,9 +95,15 @@ function NoteDetail() {
             <div className="mb-2 flex items-center justify-between px-2">
               <h2 className="flex items-center gap-2 text-sm font-medium"><FileText className="h-4 w-4 text-primary" /> Document</h2>
               {fileUrl && (
-                <a href={fileUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded-md border border-input px-2 py-1 text-xs hover:bg-secondary">
-                  <Download className="h-3 w-3" /> Open
-                </a>
+                canPreview ? (
+                  <a href={fileUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded-md border border-input px-2 py-1 text-xs hover:bg-secondary">
+                    Open in new tab
+                  </a>
+                ) : (
+                  <a href={downloadUrl ?? fileUrl} className="inline-flex items-center gap-1 rounded-md border border-input px-2 py-1 text-xs hover:bg-secondary">
+                    <Download className="h-3 w-3" /> Download
+                  </a>
+                )
               )}
             </div>
             <div className="h-[70vh] overflow-hidden rounded-xl bg-secondary/40">
@@ -96,21 +113,30 @@ function NoteDetail() {
                 </div>
               ) : isImage ? (
                 <img src={fileUrl} alt={note?.title ?? ""} className="h-full w-full object-contain" />
-              ) : isPdf || isTextish ? (
+              ) : isPdf ? (
                 <iframe src={fileUrl} title={note?.title ?? "Document"} className="h-full w-full border-0" />
+              ) : isTextish ? (
+                <div className="h-full overflow-auto p-4">
+                  {textLoading ? (
+                    <p className="text-sm text-muted-foreground">Loading…</p>
+                  ) : (
+                    <pre className="whitespace-pre-wrap break-words font-mono text-xs leading-relaxed">{textContent ?? "Could not load file."}</pre>
+                  )}
+                </div>
               ) : isAudio ? (
                 <div className="flex h-full items-center justify-center p-6"><audio src={fileUrl} controls className="w-full" /></div>
               ) : isVideo ? (
                 <video src={fileUrl} controls className="h-full w-full bg-black" />
-              ) : !canEmbed ? (
+              ) : (
                 <div className="flex h-full flex-col items-center justify-center gap-3 p-6 text-center text-sm text-muted-foreground">
                   <FileText className="h-8 w-8" />
                   <p>Preview not available for this file type.</p>
-                  <a href={fileUrl} target="_blank" rel="noreferrer" className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground">Download</a>
+                  <a href={downloadUrl ?? fileUrl} className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground">Download</a>
                 </div>
-              ) : null}
+              )}
             </div>
           </section>
+
 
           {/* Study tools */}
           <div className="space-y-6">
