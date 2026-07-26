@@ -210,13 +210,13 @@ function NoteDetail() {
                   {quizM.isPending ? "Generating…" : "Generate quiz"}
                 </button>
               </div>
-              {quizM.data && quizM.data.questions.length > 0 && (
+              {quizM.data?.questions && quizM.data.questions.length > 0 && (
                 <ol className="mt-4 space-y-4">
                   {quizM.data.questions.map((q, i) => (
                     <li key={i} className="rounded-lg border border-border p-4">
-                      <p className="font-medium">{i + 1}. {q.q}</p>
+                      <p className="font-medium">{i + 1}. {q?.q}</p>
                       <div className="mt-2 grid gap-1.5">
-                        {q.choices.map((c, ci) => {
+                        {(q?.choices ?? []).map((c, ci) => {
                           const isRevealed = revealed[i] !== undefined;
                           const isCorrect = ci === q.answer;
                           const chosen = revealed[i] === ci;
