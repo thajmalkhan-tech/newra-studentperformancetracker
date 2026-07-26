@@ -206,12 +206,17 @@ export const getNote = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     if (!note) return null;
     let fileUrl: string | null = null;
+    let downloadUrl: string | null = null;
     if (note.storage_path) {
       const { data: signed } = await context.supabase.storage
         .from("notes").createSignedUrl(note.storage_path, 60 * 60);
       fileUrl = signed?.signedUrl ?? null;
+      const { data: dl } = await context.supabase.storage
+        .from("notes").createSignedUrl(note.storage_path, 60 * 60, { download: true });
+      downloadUrl = dl?.signedUrl ?? null;
     }
-    return { ...note, file_url: fileUrl };
+    return { ...note, file_url: fileUrl, download_url: downloadUrl };
+
   });
 
 export const deleteNote = createServerFn({ method: "POST" })
