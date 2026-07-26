@@ -1,16 +1,20 @@
-Rename the app brand from "Sage" to "THE NEW COLLEGE" everywhere it appears in the UI.
+## Goal
+Opening a note should never make the browser start downloading the file on its own. Viewing stays inline; downloading only happens when the user clicks a button.
+
+## What's happening
+On the note detail page the document panel embeds the signed file URL in an `<iframe>` for PDFs and text-like files. When the stored file's content type isn't something the browser can render inline (e.g. `application/octet-stream`, Word/Office types, or a mismatched type set at upload), the iframe navigation turns into a file download instead of a preview — so simply opening the note triggers a download.
 
 ## Changes
 
-1. `src/components/AppShell.tsx`
-   - Desktop sidebar header brand (line ~53): `Sage` → `THE NEW COLLEGE`
-   - Mobile top bar brand: `Sage` → `THE NEW COLLEGE`
+1. **Note detail viewer** (`src/routes/_authenticated/notes/$noteId.tsx`)
+   - Only embed in an iframe when the type is genuinely browser-renderable inline (PDF and plain text/markdown/csv/json).
+   - For text-like files, fetch the content and render it as text in a scrollable panel instead of pointing an iframe at the URL.
+   - Everything else (Office docs, zips, unknown types) shows a "Preview not available" card — no iframe, so nothing auto-downloads.
+   - The top-right "Open" link opens in a new tab for previewable types, and is labelled "Download" only where a download is the actual action.
 
-2. `src/routes/index.tsx` (landing page)
-   - Header logo text: `Sage` → `THE NEW COLLEGE`
-   - Footer copyright: `© {year} Sage.` → `© {year} THE NEW COLLEGE.`
+2. **Signed URL handling** (`src/lib/notes.functions.ts`)
+   - Request the signed URL without any download disposition, so the file is served inline for preview.
+   - Provide a separate explicit download URL (download disposition) used only by the download button.
 
-3. `src/routes/__root.tsx`
-   - Update page `<title>` / meta description / og:title if they reference "Sage" so the browser tab and social preview match the new name.
-
-No changes to routes, data, or logic. Logo icon (BookOpen) stays. If you'd prefer a shorter display like "The New College" (mixed case) instead of all-caps, say the word and I'll adjust.
+## Result
+Navigating to a note renders a preview or a neutral placeholder; a file only lands on disk when the user clicks Download.
