@@ -4,7 +4,7 @@ import { AppShell } from "@/components/AppShell";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { askNote, deleteNote, generateQuiz, getNote, summarizeNote } from "@/lib/notes.functions";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowLeft, Download, FileText, Loader2, Send, Sparkle, Trash2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { toast } from "sonner";
@@ -61,6 +61,30 @@ function NoteDetail() {
   const isVideo = mime.startsWith("video/");
   const isTextish = mime.startsWith("text/") || /json|xml|yaml|markdown|csv/.test(mime);
   const canPreview = isImage || isPdf || isAudio || isVideo || isTextish;
+  const needsBlobPreview = Boolean(fileUrl && (isImage || isPdf || isAudio || isVideo));
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+  const { data: previewBlob, isLoading: previewLoading, error: previewError } = useQuery({
+    queryKey: ["note-file-preview", noteId, fileUrl, mime],
+    enabled: needsBlobPreview,
+    queryFn: async () => {
+      if (!fileUrl) throw new Error("No file to preview");
+      const res = await fetch(fileUrl, { headers: { Accept: mime || "*/*" } });
+      if (!res.ok) throw new Error("Could not load file preview");
+      const blob = await res.blob();
+      return mime && blob.type !== mime ? new Blob([blob], { type: mime }) : blob;
+    },
+  });
+
+  useEffect(() => {
+    if (!previewBlob) {
+      setPreviewUrl(null);
+      return;
+    }
+    const url = URL.createObjectURL(previewBlob);
+    setPreviewUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [previewBlob]);
 
   const { data: textContent, isLoading: textLoading } = useQuery({
     queryKey: ["note-text", noteId, fileUrl],
@@ -96,7 +120,7 @@ function NoteDetail() {
               <h2 className="flex items-center gap-2 text-sm font-medium"><FileText className="h-4 w-4 text-primary" /> Document</h2>
               {fileUrl && (
                 canPreview ? (
-                  <a href={fileUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded-md border border-input px-2 py-1 text-xs hover:bg-secondary">
+                  <a href={isTextish ? fileUrl : previewUrl ?? undefined} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded-md border border-input px-2 py-1 text-xs hover:bg-secondary aria-disabled:pointer-events-none aria-disabled:opacity-50" aria-disabled={!isTextish && !previewUrl}>
                     Open in new tab
                   </a>
                 ) : (
@@ -111,10 +135,20 @@ function NoteDetail() {
                 <div className="flex h-full items-center justify-center p-6 text-center text-sm text-muted-foreground">
                   {note ? "No original file for this note." : "Loading…"}
                 </div>
-              ) : isImage ? (
-                <img src={fileUrl} alt={note?.title ?? ""} className="h-full w-full object-contain" />
-              ) : isPdf ? (
-                <iframe src={fileUrl} title={note?.title ?? "Document"} className="h-full w-full border-0" />
+              ) : needsBlobPreview && previewLoading ? (
+                <div className="flex h-full items-center justify-center p-6 text-center text-sm text-muted-foreground">
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Loading preview…
+                </div>
+              ) : needsBlobPreview && previewError ? (
+                <div className="flex h-full flex-col items-center justify-center gap-3 p-6 text-center text-sm text-muted-foreground">
+                  <FileText className="h-8 w-8" />
+                  <p>This file cannot be previewed inline.</p>
+                  <a href={downloadUrl ?? fileUrl} className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground">Download</a>
+                </div>
+              ) : isImage && previewUrl ? (
+                <img src={previewUrl} alt={note?.title ?? ""} className="h-full w-full object-contain" />
+              ) : isPdf && previewUrl ? (
+                <iframe src={previewUrl} title={note?.title ?? "Document"} className="h-full w-full border-0" />
               ) : isTextish ? (
                 <div className="h-full overflow-auto p-4">
                   {textLoading ? (
@@ -123,10 +157,10 @@ function NoteDetail() {
                     <pre className="whitespace-pre-wrap break-words font-mono text-xs leading-relaxed">{textContent ?? "Could not load file."}</pre>
                   )}
                 </div>
-              ) : isAudio ? (
-                <div className="flex h-full items-center justify-center p-6"><audio src={fileUrl} controls className="w-full" /></div>
-              ) : isVideo ? (
-                <video src={fileUrl} controls className="h-full w-full bg-black" />
+              ) : isAudio && previewUrl ? (
+                <div className="flex h-full items-center justify-center p-6"><audio src={previewUrl} controls className="w-full" /></div>
+              ) : isVideo && previewUrl ? (
+                <video src={previewUrl} controls className="h-full w-full bg-black" />
               ) : (
                 <div className="flex h-full flex-col items-center justify-center gap-3 p-6 text-center text-sm text-muted-foreground">
                   <FileText className="h-8 w-8" />
