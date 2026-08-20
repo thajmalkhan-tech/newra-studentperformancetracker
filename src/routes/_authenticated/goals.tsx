@@ -6,8 +6,20 @@ import { useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/goals")({
+  head: () => ({
+    meta: [
+      { title: "Goals — NEWRA" },
+      { name: "description", content: "Set academic goals, track progress, and stay on target with NEWRA." },
+      { property: "og:title", content: "Goals — NEWRA" },
+      { property: "og:description", content: "Set academic goals, track progress, and stay on target with NEWRA." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "robots", content: "noindex" },
+    ],
+  }),
   component: Goals,
 });
+
 
 type Goal = { id: string; title: string; description: string | null; target_date: string | null; progress: number; status: "active"|"completed"|"paused" };
 
