@@ -9,8 +9,20 @@ import { useServerFn } from "@tanstack/react-start";
 import { deleteMyAccount } from "@/lib/account.functions";
 
 export const Route = createFileRoute("/_authenticated/profile")({
+  head: () => ({
+    meta: [
+      { title: "Profile — NEWRA" },
+      { name: "description", content: "Manage your personal and contact details, and your NEWRA account." },
+      { property: "og:title", content: "Profile — NEWRA" },
+      { property: "og:description", content: "Manage your personal and contact details, and your NEWRA account." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "robots", content: "noindex" },
+    ],
+  }),
   component: ProfilePage,
 });
+
 
 type ProfileForm = {
   full_name: string;

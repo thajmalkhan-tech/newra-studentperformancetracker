@@ -7,12 +7,33 @@ import { toast } from "sonner";
 
 type Search = { next?: string };
 
+const SITE = "https://newra-studentperformancetracker.lovable.app";
+
 export const Route = createFileRoute("/auth")({
+  head: () => {
+    const title = "Sign in — NEWRA";
+    const description =
+      "Sign in or create your NEWRA account to access your study planner, notes, goals and performance dashboard.";
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+        { property: "og:type", content: "website" },
+        { property: "og:url", content: `${SITE}/auth` },
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "robots", content: "noindex" },
+      ],
+      links: [{ rel: "canonical", href: `${SITE}/auth` }],
+    };
+  },
   validateSearch: (s: Record<string, unknown>): Search => ({
     next: typeof s.next === "string" ? s.next : undefined,
   }),
   component: AuthPage,
 });
+
 
 function AuthPage() {
   const nav = useNavigate();

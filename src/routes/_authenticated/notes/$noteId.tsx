@@ -10,8 +10,20 @@ import ReactMarkdown from "react-markdown";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/notes/$noteId")({
+  head: () => ({
+    meta: [
+      { title: "Note — NEWRA" },
+      { name: "description", content: "Read your uploaded note alongside AI summaries, Q&A and quizzes." },
+      { property: "og:title", content: "Note — NEWRA" },
+      { property: "og:description", content: "Read your uploaded note alongside AI summaries, Q&A and quizzes." },
+      { property: "og:type", content: "article" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "robots", content: "noindex" },
+    ],
+  }),
   component: NoteDetail,
 });
+
 
 function NoteDetail() {
   const { noteId } = useParams({ from: "/_authenticated/notes/$noteId" });
