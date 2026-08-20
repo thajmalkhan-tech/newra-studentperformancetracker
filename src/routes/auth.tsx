@@ -35,6 +35,14 @@ export const Route = createFileRoute("/auth")({
 });
 
 
+const OFFLINE_MESSAGE =
+  "Service temporarily unavailable — we can't reach the account service right now. Please try again in a few minutes.";
+
+function isNetworkFailure(err: unknown): boolean {
+  const msg = err instanceof Error ? err.message : String(err ?? "");
+  return /failed to fetch|network ?error|load failed|fetch failed|networkerror/i.test(msg);
+}
+
 function AuthPage() {
   const nav = useNavigate();
   const search = useSearch({ from: "/auth" });
@@ -44,12 +52,26 @@ function AuthPage() {
   const [fullName, setFullName] = useState("");
   const [busy, setBusy] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [offline, setOffline] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) nav({ to: (search.next as string) ?? "/home", replace: true });
-    });
+    supabase.auth
+      .getSession()
+      .then(({ data }) => {
+        if (data.session) nav({ to: (search.next as string) ?? "/home", replace: true });
+      })
+      .catch(() => setOffline(true));
   }, [nav, search.next]);
+
+  function handleError(err: unknown) {
+    if (isNetworkFailure(err)) {
+      setOffline(true);
+      toast.error(OFFLINE_MESSAGE);
+      return;
+    }
+    setOffline(false);
+    toast.error(err instanceof Error ? err.message : "Something went wrong");
+  }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -65,15 +87,17 @@ function AuthPage() {
           },
         });
         if (error) throw error;
+        setOffline(false);
         toast.success("Check your email to confirm your account, then sign in.");
         setMode("sign-in");
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
+        setOffline(false);
         nav({ to: search.next ?? "/home", replace: true });
       }
     } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : "Something went wrong");
+      handleError(err);
     } finally {
       setBusy(false);
     }
@@ -85,9 +109,12 @@ function AuthPage() {
       const result = await lovable.auth.signInWithOAuth("google", {
         redirect_uri: window.location.origin + "/auth",
       });
-      if (result.error) { toast.error(result.error.message); return; }
+      if (result.error) { handleError(result.error); return; }
       if (result.redirected) return;
+      setOffline(false);
       nav({ to: search.next ?? "/home", replace: true });
+    } catch (err: unknown) {
+      handleError(err);
     } finally {
       setBusy(false);
     }
