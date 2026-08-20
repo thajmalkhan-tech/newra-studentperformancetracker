@@ -7,8 +7,20 @@ import { Plus, Trash2, Pencil, ChevronRight, ChevronDown } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 
 export const Route = createFileRoute("/_authenticated/performance")({
+  head: () => ({
+    meta: [
+      { title: "Performance — NEWRA" },
+      { name: "description", content: "Track subjects, marks and GPA trends across your semesters." },
+      { property: "og:title", content: "Performance — NEWRA" },
+      { property: "og:description", content: "Track subjects, marks and GPA trends across your semesters." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "robots", content: "noindex" },
+    ],
+  }),
   component: Performance,
 });
+
 
 type Subject = { id: string; name: string; code: string | null; credits: number };
 type Mark = { id: string; subject_id: string; assessment: string; score: number; max_score: number; weight: number; recorded_at: string };
