@@ -141,6 +141,18 @@ function AuthPage() {
             {mode === "sign-in" ? "Sign in to continue." : "It only takes a minute."}
           </p>
 
+          {offline && (
+            <div
+              role="alert"
+              className="mt-4 rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive"
+            >
+              <p className="font-medium">Service temporarily unavailable</p>
+              <p className="mt-1 text-destructive/90">
+                We can&apos;t reach the account service right now. Please try again in a few minutes.
+              </p>
+            </div>
+          )}
+
           <button
             onClick={google}
             disabled={busy}
