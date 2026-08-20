@@ -7,8 +7,20 @@ import { toast } from "sonner";
 import { Check, Plus, Trash2 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/planner")({
+  head: () => ({
+    meta: [
+      { title: "Planner — NEWRA" },
+      { name: "description", content: "Organise your tasks by status and keep your study week on track." },
+      { property: "og:title", content: "Planner — NEWRA" },
+      { property: "og:description", content: "Organise your tasks by status and keep your study week on track." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "robots", content: "noindex" },
+    ],
+  }),
   component: Planner,
 });
+
 
 type Status = "todo" | "doing" | "done";
 type Task = { id: string; title: string; notes: string | null; due_at: string | null; priority: "low"|"medium"|"high"; status: Status };
