@@ -10,8 +10,20 @@ import { Plus, Send, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/chat/$threadId")({
+  head: () => ({
+    meta: [
+      { title: "Conversation — NEWRA" },
+      { name: "description", content: "Your NEWRA conversation: ask questions, plan your week and brainstorm ideas." },
+      { property: "og:title", content: "Conversation — NEWRA" },
+      { property: "og:description", content: "Your NEWRA conversation: ask questions, plan your week and brainstorm ideas." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "robots", content: "noindex" },
+    ],
+  }),
   component: ChatPage,
 });
+
 
 function ChatPage() {
   const { threadId } = useParams({ from: "/_authenticated/chat/$threadId" });
