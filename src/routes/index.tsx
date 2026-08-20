@@ -1,9 +1,29 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { BookOpen, Brain, Calendar, LineChart, MessageSquare, Sparkle, Target, Upload } from "lucide-react";
 
+const SITE = "https://newra-studentperformancetracker.lovable.app";
+
 export const Route = createFileRoute("/")({
+  head: () => {
+    const title = "NEWRA — AI Study Advisor for Students";
+    const description =
+      "Plan tasks, track grades, study your notes with AI, and hit your goals — all in one student advisor powered by NEWRA.";
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+        { property: "og:type", content: "website" },
+        { property: "og:url", content: `${SITE}/` },
+        { name: "twitter:card", content: "summary_large_image" },
+      ],
+      links: [{ rel: "canonical", href: `${SITE}/` }],
+    };
+  },
   component: Landing,
 });
+
 
 function Feature({ icon: Icon, title, body }: { icon: React.ComponentType<{ className?: string }>; title: string; body: string }) {
   return (
