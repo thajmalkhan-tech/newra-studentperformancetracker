@@ -8,8 +8,20 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/notes/")({
+  head: () => ({
+    meta: [
+      { title: "Study library — NEWRA" },
+      { name: "description", content: "Upload notes, PDFs and documents, then study them with AI Q&A and quizzes." },
+      { property: "og:title", content: "Study library — NEWRA" },
+      { property: "og:description", content: "Upload notes, PDFs and documents, then study them with AI Q&A and quizzes." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "robots", content: "noindex" },
+    ],
+  }),
   component: NotesIndex,
 });
+
 
 function NotesIndex() {
   const qc = useQueryClient();
